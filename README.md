@@ -13,17 +13,22 @@ This repo is a complete AI toolkit for healthcare. Every skill is a standalone p
 
 | Skill | What it does | Time saved |
 |-------|-------------|------------|
-| 🩺 Clinical Note Drafter | Turn dictation or bullet points into a structured SOAP note ready for chart review. | ~15 min/note |
-| 📋 Prior Auth Letter Generator | Draft a prior authorization request with clinical justification and supporting references. | ~25 min/letter |
-| 📄 Patient Education Handout | Create a plain-language handout explaining a diagnosis, treatment plan, or medication. | ~15 min/handout |
-| ✉️ Referral Summary Writer | Compile relevant history, findings, and questions into a concise referral letter. | ~10 min/referral |
-| 🔍 Coding Review Assistant | Review documentation against ICD-10/ICD-11 and CPT codes to flag under-coding, over-coding, and compliance risks. | ~10 min/encounter |
-| ⚖️ Policy & Compliance Q&A | Answer staff questions about HIPAA, OSHA, or payer-specific rules with source references. | ~5 min/question |
-| 🏥 Discharge Summary Generator | Transform clinical encounter data into a structured discharge summary for the medical record. | ~20 min/summary |
-| 📨 Denial Appeal Letter Writer | Draft a persuasive, evidence-based appeal letter to overturn payer claim denials. | ~30 min/letter |
-| 📊 Pre-Visit Chart Summarizer | Synthesize a patient's medical record into a concise, scannable summary for pre-encounter review. | ~10 min/patient |
+| Clinical Note Drafter | Transform dictation, bullet points, or free-text encounter details into a structured clinical note (SOAP, H&P, progress note, or procedure note) ready for provider review and chart signature. | ~15 min/note |
+| Discharge Summary Generator | Transform clinical encounter data, hospital course notes, and treatment records into a structured, comprehensive discharge summary ready for the medical record and care-transition handoff. | ~20 min/summary |
+| Medication Reconciliation Assistant | Compare a patient's medication lists across care-transition points (admission, transfer, discharge, primary care follow-up, specialty visit) and produce a reconciled, structured medication list with changes, discrepancies, therapeutic duplications, interaction concerns, and high-priority clarifying questions — reducing the chance that an adverse drug event slips through a care transition. | ~15 min/reconciliation |
+| Pre-Visit Chart Summarizer | Synthesize a patient's medical record into a concise, actionable summary that a clinician can review in under two minutes before walking into the exam room. | ~10 min/patient |
+| Referral Summary Writer | Compile a patient's relevant history, clinical findings, workup results, and specific consultation questions into a concise, well-organized referral letter that gives the receiving specialist everything they need to prepare for the consultation. | ~10 min/referral |
+| Patient Education Handout | Create a plain-language handout explaining a diagnosis, treatment plan, or medication. | ~15 min/handout |
+| Coding Review Assistant | Review clinical documentation against ICD-10 (and emerging ICD-11) and CPT/HCPCS codes to identify under-coding, over-coding, mismatches, and missed opportunities — helping maximize appropriate reimbursement while maintaining compliance. | ~10 min/encounter |
+| Denial Appeal Letter Writer | Draft a persuasive, evidence-based appeal letter in response to a payer claim denial, referencing clinical guidelines, medical necessity criteria, and patient-specific documentation to support overturning the denial. | ~30 min/letter |
+| HEDIS Care Gap & Chart Abstraction Assistant | Review a patient chart against a list of HEDIS (or other quality program) measures to identify open care gaps, extract supporting documentation evidence for hybrid/ECDS submission, and flag potential numerator/denominator/exclusion hits so the quality team can close gaps or submit compliant chart evidence. | ~20 min/chart |
+| Policy & Compliance Q&A | Answer staff questions about HIPAA, OSHA, or payer-specific rules with source references. | ~5 min/question |
+| Prior Auth Letter Generator | Draft a comprehensive prior authorization request letter with clinical justification, supporting evidence, and payer-specific formatting to maximize the probability of first-pass approval. | ~25 min/letter |
+| Email Drafter | Turn rough notes, voice dictation, or bullet points into a professional, HIPAA-aware healthcare email tailored to the recipient type (patient, referring provider, payer, vendor, staff) and the purpose of the message. | ~10 min/email |
+| Meeting Summarizer | Turn raw healthcare meeting notes, transcripts, or voice dictation into a structured summary separating decisions, action items, open questions, and care-coordination follow-ups — with HIPAA-aware handling of any patient details discussed. | ~15 min/meeting |
+| Review Responder | Craft a HIPAA-compliant, platform-appropriate response to an online healthcare review (positive, negative-clinical, negative-operational, or false/defamatory) that builds trust with prospective patients without acknowledging a provider–patient relationship or discussing any PHI. | ~10 min/review |
 
-**Total time saved per use: ~140+ minutes across all skills.**
+**Total time saved per use: ~210+ minutes across all skills.**
 
 ## Quick Start
 
