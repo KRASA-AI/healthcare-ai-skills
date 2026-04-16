@@ -4,7 +4,7 @@ category: operations
 tools: [claude, chatgpt]
 difficulty: beginner
 time_saved: "~10 min/referral"
-version: 2.0
+version: 2.1
 last_eval_score: 8.2
 ---
 
@@ -102,4 +102,64 @@ You are a skilled healthcare professional's AI assistant. Your job is to draft a
 
 ## Example Output
 
-> [This section will be populated by the eval system with a reference example. For now, run the skill with sample input to see output quality.]
+```
+[Practice Letterhead — from config.yml]
+
+2026-04-14
+
+John Park, MD
+Cardiology Associates of [City]
+[Address]
+Fax: [fax] • Secure EHR: [network]
+
+RE: Referral for Maria L. — new-onset atrial fibrillation, rate control and
+anticoagulation strategy
+
+Dr. Park,
+
+I am referring Maria L. (DOB 1961-03-22, MRN 4417XXXX) for cardiology
+evaluation of new-onset atrial fibrillation diagnosed on outpatient ECG on
+2026-04-08. Routine urgency. Rate currently controlled; patient is clinically
+stable.
+
+Active problems relevant to referral
+- New-onset atrial fibrillation (I48.91), first documented 2026-04-08
+- HTN (I10), controlled on lisinopril 20 mg daily
+- T2DM (E11.9), HbA1c 6.8% (2026-02-18)
+- CKD stage 3a, eGFR 51 (2026-02-18)
+- No prior CVA/TIA, no known structural heart disease, non-smoker, no prior bleeding
+
+Current medications
+- Lisinopril 20 mg daily • Metformin 1000 mg BID • Atorvastatin 40 mg QHS
+- No anticoagulant or antiplatelet at this time
+
+Workup to date
+- ECG 2026-04-08: atrial fibrillation, rate 96, no ischemic changes
+- TSH 2026-04-09: 1.8 (normal)
+- BMP, CBC, LFTs 2026-02-18: normal aside from eGFR 51
+- Echocardiogram ordered, pending (scheduled 2026-04-21)
+- CHA₂DS₂-VASc score: 4 (age 65–74, female, HTN, DM) — anticoagulation indicated
+- HAS-BLED score: 1 (HTN); no other bleeding risks
+
+What we are asking
+1. Confirm rhythm vs. rate control strategy given age, CKD, and comorbidities.
+2. Recommend anticoagulant selection given eGFR 51 (DOAC dose adjustment vs.
+   warfarin); address renally adjusted dabigatran vs. apixaban vs. rivaroxaban.
+3. Advise on need for cardioversion or referral for EP evaluation if rhythm
+   control is preferred.
+4. Specify follow-up interval and any monitoring we should own in primary care.
+
+I have discussed the diagnosis and stroke-risk rationale with the patient; she
+is open to anticoagulation and prefers a once-daily DOAC if clinically
+appropriate. Records including ECG, labs, and pending echo report will be sent
+via secure EHR. Please return the consultation note to my direct EHR inbox or
+fax [number]. I am available at [direct line].
+
+Thank you for seeing her.
+
+[Referring Provider Name], MD
+[Practice Name] • NPI [##########]
+Direct: [phone] • Secure message: [link]
+```
+
+The example illustrates the target: one page, CHA₂DS₂-VASc / HAS-BLED / eGFR surfaced, explicit numbered consultation questions, and a clearly stated patient preference — everything the specialist needs to prepare.
