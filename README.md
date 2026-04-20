@@ -26,6 +26,7 @@ This repo is a complete AI toolkit for healthcare. Every skill is a standalone p
 | Coding Review Assistant | Review clinical documentation against ICD-10 (and emerging ICD-11) and CPT/HCPCS codes to identify under-coding, over-coding, mismatches, and missed opportunities — helping maximize appropriate reimbursement while maintaining compliance. | ~10 min/encounter |
 | Denial Appeal Letter Writer | Draft a persuasive, evidence-based appeal letter in response to a payer claim denial, referencing clinical guidelines, medical necessity criteria, and patient-specific documentation to support overturning the denial. | ~30 min/letter |
 | HEDIS Care Gap & Chart Abstraction Assistant | Review a patient chart against a list of HEDIS (or other quality program) measures to identify open care gaps, extract supporting documentation evidence for hybrid/ECDS submission, and flag potential numerator/denominator/exclusion hits so the quality team can close gaps or submit compliant chart evidence. | ~20 min/chart |
+| Payer Downcoding Rebuttal Letter | Draft a code-specific, evidence-grounded rebuttal letter when a payer has *silently downcoded* a claim — most commonly an E/M level, an inpatient DRG, an observation-to-inpatient reclassification, or a procedure bundled without a modifier — rather than issuing a formal denial. | ~35 min/letter |
 | Policy & Compliance Q&A | Answer staff questions about HIPAA, OSHA, CMS, state licensure, payer policy, and accreditation rules with a source-cited, confidence-labeled response a compliance officer can confidently relay to the team or escalate to counsel. | ~15 min/question |
 | Prior Auth Letter Generator | Draft a comprehensive prior authorization request letter with clinical justification, supporting evidence, and payer-specific formatting to maximize the probability of first-pass approval. | ~25 min/letter |
 | WISeR Medicare Prior Auth Prep | Assemble a WISeR-ready prior authorization or pre-payment review packet for a Traditional (Original) Medicare beneficiary who lives in a WISeR state and is scheduled for a service on the WISeR list. | ~30 min/submission |
@@ -33,7 +34,7 @@ This repo is a complete AI toolkit for healthcare. Every skill is a standalone p
 | Meeting Summarizer | Turn raw healthcare meeting notes, transcripts, or voice dictation into a structured summary separating decisions, action items, open questions, and care-coordination follow-ups — with HIPAA-aware handling of any patient details discussed. | ~15 min/meeting |
 | Review Responder | Craft a HIPAA-compliant, platform-appropriate response to an online healthcare review (positive, negative-clinical, negative-operational, or false/defamatory) that builds trust with prospective patients without acknowledging a provider–patient relationship or discussing any PHI. | ~10 min/review |
 
-**Total time saved per use: ~287+ minutes across all skills.**
+**Total time saved per use: ~322+ minutes across all skills.**
 
 ## Quick Start
 
