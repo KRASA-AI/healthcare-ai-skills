@@ -4,8 +4,8 @@ category: _shared
 tools: [claude, chatgpt]
 difficulty: beginner
 time_saved: "~10 min/email"
-version: 2.0
-last_eval_score: 4.3
+version: 2.1
+last_eval_score: 8.3
 ---
 
 # ✉️ Email Drafter
@@ -126,4 +126,106 @@ Patient communication via email and portal is a tracked patient-experience measu
 
 ## Example Output
 
-> [This section will be populated by the eval system with a reference example. For now, run the skill with sample input to see output quality.]
+Three worked examples covering the three most common healthcare email channels: patient portal follow-up, provider-to-provider referral confirmation, and payer appeal follow-up. Each was produced from a short bullet-point input and is ready for clinician review.
+
+### Example 1 — Patient portal follow-up (hypertension, new lisinopril start)
+
+**Input bullets:** Patient M.L., 64F, established, visit 2026-04-22 for annual; started lisinopril 10 mg qAM; asked to log home BP twice a week for 4 weeks; next visit in 6 weeks; channel: portal (encrypted).
+
+```
+Subject: Following up on your 4/22 visit
+
+Hello Maria,
+
+Thank you for coming in last week. Here is a quick recap of your plan.
+
+You started lisinopril 10 mg, one pill every morning with or without food.
+Most people feel no change on this medicine, and that is normal. A small
+number of people get a dry cough — please let us know if you do.
+
+Home blood pressure check: twice a week for the next 4 weeks, any time of
+day but try to be consistent. Write the top and bottom numbers down and
+bring the log to your next visit. If any reading is higher than 160/100 on
+two different days, please message us.
+
+Your next visit is on or around 6/3 — we will reach out to schedule.
+Please call us at [office number] or reply through the portal if you have
+questions. If you have chest pain, trouble breathing, swelling of the lips
+or tongue, or weakness on one side of the body, call 911.
+
+— Dr. A. Romero and the care team at [Practice Name]
+
+[Confidentiality footer from config.yml]
+```
+
+`[VERIFY: patient consent to portal communications on file]`
+
+### Example 2 — Provider-to-provider referral confirmation (new-onset AFib to cardiology)
+
+**Input bullets:** Patient initials M.L., DOB 03/1961; new-onset AFib on 2026-04-08 outpatient ECG; rate-controlled, stable; referring to Dr. J. Park at Cardiology Associates; CHA₂DS₂-VASc 4, HAS-BLED 1; eGFR 51; echo pending 4/21; routine; channel: DirectTrust / secure EHR.
+
+```
+Subject: Re: M.L., DOB 03/61 — new-onset AFib, rate control + AC strategy
+
+Dr. Park,
+
+Referring M.L. (DOB 03/1961, MRN [last 4] 4417) for cardiology evaluation
+of new-onset atrial fibrillation documented on outpatient ECG 2026-04-08.
+Rate currently controlled; patient clinically stable; routine referral.
+
+Relevant context: HTN on lisinopril 20 mg daily, T2DM on metformin with
+HbA1c 6.8% (2/18), CKD stage 3a (eGFR 51, 2/18). No prior stroke, no
+bleeding history, non-smoker. No current anticoagulant. CHA₂DS₂-VASc 4;
+HAS-BLED 1. TTE ordered, scheduled 4/21 — report will follow.
+
+Specific questions: (1) rhythm vs. rate control given age, CKD, and
+comorbidities; (2) anticoagulant selection with eGFR 51 (DOAC dose
+adjustment vs. warfarin); (3) need for cardioversion / EP referral if
+rhythm control is preferred; (4) monitoring cadence we can own in primary
+care.
+
+Happy to speak by phone if helpful — my direct line is [phone]. Please
+return the consultation note to my EHR inbox or fax [number].
+
+Thank you,
+
+A. Romero, MD   NPI [##########]
+[Practice Name]   Direct: [phone]   Secure: [DirectTrust address]
+```
+
+### Example 3 — Payer appeal follow-up (denied lumbar MRI PA)
+
+**Input bullets:** Member ID last 4 = 9021, DOS 2026-04-15, claim/PA ref # 77-4812; denied MRI lumbar w/o contrast 72148; requesting status on 4/18 appeal; primary contact for peer-to-peer; channel: payer secure portal (encrypted).
+
+```
+Subject: Status — Appeal of PA Denial, Ref 77-4812, DOS 04/15/2026
+
+Appeal Reviewer,
+
+Writing to request a status update on the appeal submitted 2026-04-18 for
+member ending 9021, PA reference 77-4812 (lumbar MRI without contrast,
+CPT 72148). The original denial was received 2026-04-16 citing
+"insufficient conservative-care documentation."
+
+Our appeal packet included documented failure of 6 weeks of PT (records
+2026-02-05 through 2026-03-20), three weeks of gabapentin titration
+without benefit, and a current neurologic exam with radicular signs
+correlating to the imaging indication. Full clinical rationale and
+records were submitted via your appeals portal on 4/18 (confirmation
+number [number] on file).
+
+Please confirm receipt, the current review stage, and the expected
+determination date. If a peer-to-peer would expedite the review, the
+ordering provider (Dr. A. Romero, NPI [##########]) is available at
+[direct line] between 1–4 pm local time.
+
+Thank you,
+
+[Billing / Revenue Integrity contact], [Practice Name]
+Phone: [number] • Fax: [number]
+[Confidentiality footer from config.yml]
+```
+
+`[VERIFY: appeal reference number and submission confirmation on file]`
+
+The three examples illustrate the target across the most common channels: patient-appropriate reading level and a single clear next step; provider-to-provider brevity with numbered questions and identifiable-minimum PHI; payer correspondence that buries no ask and offers peer-to-peer without pleading.

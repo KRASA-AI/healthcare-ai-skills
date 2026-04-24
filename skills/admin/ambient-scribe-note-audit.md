@@ -4,7 +4,7 @@ category: admin
 tools: [claude, chatgpt]
 difficulty: advanced
 time_saved: "~12 min/audit"
-version: 1.0
+version: 1.1
 last_eval_score: null
 ---
 
@@ -216,10 +216,45 @@ Reviewer: J. Lopez, CDI   Review date: 2026-04-15
 Follow-up trigger: pattern check if 3+ similar ROS/exam findings in next sample
 ```
 
+## Nursing-Specific Bias & HITL Audit Extension (v1.1)
+
+Added April 24, 2026. Use this extension when the ambient-drafted note under audit is a nursing note (RN, LPN, APRN), a nurse-led handoff, or a nurse-authored patient-education / discharge-education artifact produced with an ambient tool. The extension applies the February 25, 2026 American Academy of Nursing (AAN) AI Position Statement's Human-in-the-Loop (HITL) and bias-evaluation expectations to the audit — nurses signing AI-assisted documentation retain full legal and ethical responsibility for each entry, so the audit surfaces drift patterns that are specifically nursing-side and specifically bias-shaped.
+
+Trigger this extension whenever any of the following is true:
+- The author of record is a nurse (RN, LPN, APRN) or a nursing-led team (charge nurse handoff, care-manager documentation, school nurse, home-health visit note)
+- The note is the nurse-handoff (I-SBARR) artifact already covered by `nurse-shift-handoff-isbarr.md` and an audit is being run against the ambient output
+- The encounter involves a patient from a population historically harmed by healthcare-AI performance gaps (Black, Indigenous, Hispanic/Latine, LEP, deaf/hard-of-hearing, older adult, pediatric, disabled)
+- The ambient tool has been reported (internally or in published literature) to transcribe, summarize, or prioritize differently by dialect, accent, or phrasing — the "Invisible Scribes" pattern
+
+When this extension is triggered, add Section 7 (Nursing-specific findings) and Section 8 (Bias & HITL attestation) to the standard six-section report.
+
+### Section 7: Nursing-specific findings
+
+For each of the following, score independently of the E/M coding focus in Sections 3–4:
+
+1. **Nursing scope & standardized language** — Drafted content uses nursing-specific language (NANDA-I, NIC, NOC, nursing process) where the structured chart expects it; ambient note does not substitute physician-style A&P language for nursing-process documentation. Risk 🟡–🟠 if a scope-of-practice mismatch could affect a licensing board review.
+2. **Handoff integrity (I-SBARR)** — If the note is a handoff, the Introduction–Situation–Background–Assessment–Recommendation–Readback elements are each represented and supported by the encounter signal. Readback / confirmation element is captured. Risk 🟠 if a safety-critical element is missing or fabricated.
+3. **Pain-assessment, behavioral, and patient-voice fidelity** — The ambient note's paraphrase of patient-reported pain, distress, or symptom language does not systematically under-score or re-frame a patient's own words. Red flag: patient states "worst pain of my life" and ambient draft records "moderate discomfort." Risk 🟠–🔴.
+4. **Skin / wound / fall-risk / pressure-injury documentation** — Findings match bedside-assessment signal (photo log, pressure-injury scale, fall-risk tool). Ambient tool did not default to "skin intact" when the bedside assessment captured otherwise. Risk 🟠 if a CMS-reportable hospital-acquired condition could be mis-documented.
+5. **Medication administration & titration** — Times, doses, and routes match MAR / smart-pump log; ambient note did not collapse multiple administrations into one line. Risk 🔴 if a controlled-substance or high-alert med event is mis-documented.
+6. **Education & teach-back** — "Patient verbalized understanding" statements are only present where the encounter signal actually captured a teach-back turn. Risk 🟠 if fabricated teach-back supports a discharge-readiness decision.
+
+### Section 8: Bias & HITL attestation
+
+A short block (6–12 lines) that reports:
+
+- **Demographic context** — Patient's self-reported race, ethnicity, preferred language, and any accommodation needs, pulled from the structured chart (do not infer from voice or free text).
+- **Transcript-fidelity signal** — Whether the ambient tool's transcript shows signs of the known bias-shaped failure modes ("Invisible Scribes" patterns): dropped turns in non-English or accented English, summarization that omits the patient's own phrasing, prioritization that promotes clinician voice over patient voice. If no transcript is available, state that explicitly — *absence of testability is itself a finding.*
+- **HITL attestation** — Confirms that the signing nurse reviewed the ambient draft, verified it against bedside assessment, and accepts full professional responsibility per AAN 2026. The audit does not accept "auto-accept" as HITL. If the note was auto-signed without a documented review turn, risk is 🟠 by default.
+- **Governance trigger** — Whether the finding should be added to the deployer's AI Tool Registry performance log and whether a trend escalation to the nursing-led AI oversight committee is warranted (yes if ≥ 2 bias-shaped findings in a rolling 10-note sample).
+
+Output of Sections 7–8 feeds back into the Section 2 verdict: if any nursing-specific finding is 🔴, the overall verdict is `FABRICATION RISK` regardless of coding impact; if ≥ 2 bias-shaped findings surface in Section 8, the overall verdict is at minimum `MATERIAL DRIFT` and the audit is flagged for governance review.
+
 ## Notes on Fit and Limits
 
-- Intended for CDI, coding, compliance, and revenue-cycle teams. Not a clinical decision-support tool.
+- Intended for CDI, coding, compliance, revenue-cycle, and (v1.1) nursing-led AI oversight teams. Not a clinical decision-support tool.
 - Operates on documents, not audio. Where transcript access is permitted by policy and vendor agreement, audit quality improves substantially; otherwise the skill operates on structured encounter data plus the signed note only.
 - Complements, rather than replaces, the existing Coding Review Assistant skill (which focuses on ICD-10 / HCC / DRG code selection). This skill focuses on the *documentation-to-coding* integrity path specifically in an ambient-authored note.
 - Complements, rather than replaces, payer-specific denial rebuttal work. When a payer downcodes a claim based on ambient-drafted content, use this skill's output as an input to the Denial Appeal Letter Writer skill.
-- Anti-plagiarism: output is original paraphrasing and structured risk rating. Never reproduces vendor templates, payer policy language, or clinical note content verbatim.
+- v1.1 extension complements, rather than replaces, the `nurse-shift-handoff-isbarr.md` skill — handoff drafting is a different workflow than handoff auditing. Use I-SBARR handoff skill to draft; use this skill (Sections 7–8) to audit.
+- Anti-plagiarism: output is original paraphrasing and structured risk rating. Never reproduces vendor templates, payer policy language, clinical note content, or AAN position-statement text verbatim.

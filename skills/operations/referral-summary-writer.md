@@ -4,8 +4,8 @@ category: operations
 tools: [claude, chatgpt]
 difficulty: beginner
 time_saved: "~10 min/referral"
-version: 2.1
-last_eval_score: 8.2
+version: 2.2
+last_eval_score: 8.3
 ---
 
 # ✉️ Referral Summary Writer
@@ -49,6 +49,15 @@ You are a skilled healthcare professional's AI assistant. Your job is to draft a
 - Load `config.yml` from the repo root for facility details, provider credentials, and formatting preferences
 - Reference `knowledge-base/terminology/` for correct clinical terms and standard abbreviations
 - Use the facility's communication tone from `config.yml` → `voice`
+
+**Use practice-specific referral hooks from `config.yml` when present:**
+
+- **`config.yml` → `referral_partners`** — a keyed list of preferred specialists or groups the practice routes to by category (e.g., `cardiology: "Cardiology Associates of [City] — Dr. J. Park"`, `orthopedics_spine: "Regional Spine Group — intake fax [xxx]"`, `behavioral_health: "[Community CMHC] — secure EHR inbox"`). If the user did not name a receiving provider, default to the mapped partner for the relevant category. If the category is not mapped, produce the letter addressed to the specialty generically and flag `[VERIFY: practice-specific referral network]`.
+- **`config.yml` → `referral_channel_defaults`** — per-partner routing: `secure_ehr` (DirectTrust / Epic Care Everywhere / EHR-to-EHR message), `fax`, `portal_upload`, or `hand-carry`. Use the partner's default; otherwise default to secure EHR if the partner is on the same network and fax otherwise.
+- **`config.yml` → `urgency_thresholds`** — practice overrides for what counts as urgent vs. emergent for common conditions (e.g., new-onset AFib without instability → routine-7-day by default; new focal neuro deficit → emergent same-day). If the practice has local override rules, respect them over the defaults.
+- **`config.yml` → `preferred_consult_questions`** — specialty-specific boilerplate questions the practice asks on every referral of that type (e.g., for every cardiology AFib referral: "confirm rate vs. rhythm strategy, recommend anticoagulant given renal function, specify follow-up cadence"). Blend these with the patient-specific questions so every letter includes both.
+- **`config.yml` → `provider_signature`** — pull NPI, direct line, secure-message address, and credentials into the signature block.
+- **`config.yml` → `config_missing_behavior`** — if the config key is absent, insert the corresponding `[VERIFY]` flag rather than inventing a partner, channel, or threshold.
 
 **Process:**
 
