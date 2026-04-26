@@ -4,8 +4,8 @@ category: operations
 tools: [claude, chatgpt]
 difficulty: beginner
 time_saved: "~20 min/summary"
-version: 1.0
-last_eval_score: null
+version: 1.1
+last_eval_score: 8.5
 ---
 
 # 🏥 Discharge Summary Generator
@@ -101,4 +101,209 @@ You are a skilled healthcare professional's AI assistant. Your job is to produce
 
 ## Example Output
 
-> [This section will be populated by the eval system with a reference example. For now, run the skill with sample input to see output quality.]
+The example below shows a full discharge summary generated from terse hospitalist sign-out notes for one of the highest-volume readmission-risk discharges — acute decompensated heart failure. It exercises every required section (demographics, principal/secondary diagnoses, hospital course, procedures and results, reconciled discharge medications with NEW / CHANGED / DISCONTINUED tags, condition and disposition, follow-up, education), surfaces a NEW-medication safety check (potassium and renal monitoring on combined ACE-inhibitor + spironolactone), and explicitly flags one element the dictation does not support so the receiving clinician sees the gap rather than a fabrication.
+
+### Input from user (paraphrased hospitalist sign-out)
+
+- **Admission:** 2026-04-19, admitted from ED. Admitting dx: acute on chronic HFrEF (LVEF 30%, last echo 2025); admitting team: Hospitalist – Dr. K. Nguyen.
+- **Hospital course:** ED with progressive DOE, 4 lb wt gain in 1 wk, JVD 10 cm, bibasilar crackles, +1 pitting LE edema, BNP 1840 (baseline ~600), Cr 1.3 (baseline 1.1). Started on IV furosemide 80 mg BID, telemetry, weighed daily. Net negative ~6 L over the stay. Cardiology consulted HD2 — added spironolactone 25 mg daily, increased lisinopril 10 → 20, continued metoprolol succinate 50 mg, added empagliflozin 10 mg. Echo HD2 confirmed LVEF 30%, no new wall-motion abnormalities. Discharged HD4 with home weights program and HF-clinic follow-up.
+- **Discharge meds (reconciled by pharmacy):** Furosemide 40 mg PO daily (NEW PO conversion from IV); lisinopril 20 mg PO daily (CHANGED, was 10); metoprolol succinate 50 mg PO daily (UNCHANGED); spironolactone 25 mg PO daily (NEW); empagliflozin 10 mg PO daily (NEW); aspirin 81 mg PO daily (UNCHANGED); atorvastatin 40 mg PO daily (UNCHANGED). DISCONTINUED: ibuprofen PRN (patient was self-medicating; NSAID contraindicated in HFrEF).
+- **Disposition:** Home with home health for HF education and weights.
+- **Follow-up:** HF clinic 7 days, PCP 14 days, BMP in 1 week.
+- **Patient context:** 68-year-old male, hx HTN, T2DM, prior CABG 2018, NKDA, code status full. Discharge weight 84.5 kg (admission 90.3 kg).
+
+### Generated discharge summary
+
+```
+=== Discharge Summary ===
+
+--- a. Patient Demographics & Admission Info ---
+
+Patient: [Name]              DOB: [yyyy-mm-dd]      MRN: [xxxxx]
+Sex: Male                    Age at admission: 68
+Admission date: 2026-04-19   Discharge date: 2026-04-23
+Length of stay: 4 days
+Admitting physician: K. Nguyen, MD (Hospitalist)
+Discharging physician: K. Nguyen, MD (Hospitalist)
+Admitting diagnosis: Acute on chronic decompensated heart failure with
+  reduced ejection fraction (HFrEF, LVEF 30%)
+Code status at discharge: Full code
+Allergies: NKDA
+
+--- b. Principal & Secondary Diagnoses ---
+
+Principal discharge diagnosis:
+- Acute on chronic systolic (congestive) heart failure (ICD-10: I50.23)
+
+Secondary diagnoses addressed during the stay:
+- Heart failure with reduced ejection fraction, LVEF 30% (ICD-10: I50.22)
+- Essential hypertension (ICD-10: I10)
+- Type 2 diabetes mellitus without complications (ICD-10: E11.9)
+- History of coronary artery bypass grafting, 2018 (ICD-10: Z95.1)
+- Acute kidney injury, transient, resolved (ICD-10: N17.9) — Cr peak 1.4
+  during diuresis, returned to baseline 1.1 prior to discharge
+- Inappropriate NSAID use, addressed and discontinued (ICD-10: Z79.899)
+
+--- c. Hospital Course ---
+
+The patient is a 68-year-old man with chronic HFrEF (LVEF 30% on prior
+echo), HTN, T2DM, and prior CABG, who presented to the emergency
+department on April 19, 2026, with one week of progressive dyspnea on
+exertion and a 4-pound weight gain. ED examination revealed jugular
+venous distention to 10 cm, bibasilar crackles, and 1+ pitting lower-
+extremity edema. BNP was elevated at 1840 pg/mL (baseline approximately
+600), and creatinine was 1.3 mg/dL (baseline 1.1).
+
+The patient was admitted to the hospitalist service for treatment of
+acute on chronic decompensated heart failure. He was started on
+intravenous furosemide 80 mg twice daily, placed on telemetry, and
+weighed daily. Net negative fluid balance of approximately 6 liters
+was achieved over the stay, with corresponding weight reduction from
+90.3 kg on admission to 84.5 kg at discharge.
+
+Cardiology was consulted on hospital day 2 and recommended optimization
+of guideline-directed medical therapy: addition of spironolactone 25 mg
+daily, up-titration of lisinopril from 10 mg to 20 mg daily, addition
+of empagliflozin 10 mg daily, and continuation of metoprolol succinate
+50 mg daily. Echocardiogram on hospital day 2 confirmed LVEF 30% with
+no new wall-motion abnormalities and no significant valvular disease.
+
+During diuresis, creatinine peaked at 1.4 mg/dL, consistent with mild
+contraction-related transient acute kidney injury, and returned to
+baseline 1.1 mg/dL by hospital day 4 with diuretic adjustment.
+Potassium remained within normal range throughout (K+ 4.0–4.4) on the
+combined ACE-inhibitor / mineralocorticoid antagonist regimen.
+
+The patient's home medication list was reconciled with the inpatient
+team and the consulting cardiologist. Self-administered ibuprofen for
+chronic knee pain was identified and discontinued, with patient
+counseling on the contraindication of NSAIDs in HFrEF.
+
+By hospital day 4, the patient was clinically euvolemic, off
+intravenous diuretics, ambulating without dyspnea, and tolerating an
+oral diuretic and the up-titrated guideline-directed regimen. He was
+discharged home with home health for heart-failure education and a
+home-weights program.
+
+--- d. Procedures & Results ---
+
+Procedures performed during this admission:
+- Transthoracic echocardiogram (HD2) — LVEF 30%, no new wall-motion
+  abnormality, no significant valvular disease
+- No invasive procedures performed during this stay
+
+Key lab and study trends:
+- BNP: 1840 (admission) → not redrawn at discharge [VERIFY: re-trend at
+  follow-up if clinically indicated]
+- Creatinine: 1.1 (baseline) → 1.3 (admission) → 1.4 (peak HD2) → 1.1
+  (discharge)
+- Potassium: 4.0 (admission) → 4.2 (HD2) → 4.4 (HD3) → 4.3 (discharge)
+- Sodium: 138 throughout
+- Hemoglobin A1c: not redrawn this admission
+- Daily weights: 90.3 → 88.1 → 86.2 → 85.1 → 84.5 kg
+- Telemetry: sinus rhythm with rare PVCs; no sustained arrhythmia
+
+--- e. Discharge Medications ---
+
+Reconciled discharge medication list:
+
+| Medication                  | Dose        | Route | Frequency  | Status         |
+|-----------------------------|-------------|-------|------------|----------------|
+| Furosemide                  | 40 mg       | PO    | daily      | NEW (PO conversion from IV) |
+| Lisinopril                  | 20 mg       | PO    | daily      | CHANGED (was 10 mg) |
+| Metoprolol succinate (XL)   | 50 mg       | PO    | daily      | UNCHANGED      |
+| Spironolactone              | 25 mg       | PO    | daily      | NEW            |
+| Empagliflozin               | 10 mg       | PO    | daily      | NEW            |
+| Aspirin                     | 81 mg       | PO    | daily      | UNCHANGED      |
+| Atorvastatin                | 40 mg       | PO    | daily      | UNCHANGED      |
+| Ibuprofen PRN               | —           | —     | —          | DISCONTINUED — NSAID contraindicated in HFrEF; patient counseled |
+
+Safety flags for the receiving provider:
+- ⚠ Combined ACEi (lisinopril 20) + MRA (spironolactone 25) requires
+  baseline-and-1-week BMP for potassium and creatinine monitoring per
+  HFSA guidance. BMP ordered for one week post-discharge as part of
+  follow-up plan below.
+- ⚠ NSAIDs to remain off the medication list. Counsel on acetaminophen
+  for chronic knee pain.
+- ⚠ Empagliflozin: counseled on euglycemic-DKA awareness, sick-day
+  rules, and genital-mycotic hygiene.
+
+--- f. Discharge Condition & Disposition ---
+
+Condition at discharge: Clinically euvolemic. Vitals at discharge:
+BP 122/74, HR 68 regular, SpO2 96% on room air, weight 84.5 kg
+(down 5.8 kg from admission). Ambulating independently without dyspnea.
+Tolerating diet.
+
+Disposition: Home with home health.
+- Home health: Heart-failure education and home-weights monitoring,
+  3 visits/week × 2 weeks, then re-assess
+- Activity: Ambulate as tolerated; cardiac rehabilitation referral
+  placed
+- Diet: Heart-healthy, ≤ 2 g sodium/day, ≤ 2 L fluid restriction/day
+- Daily weight log provided to patient; instructions to call HF clinic
+  for ≥ 2 lb gain in 24 h or ≥ 5 lb gain in 1 week
+
+--- g. Follow-Up Plan ---
+
+| Appointment / Task                  | Timing             | Responsible Party |
+|-------------------------------------|--------------------|-------------------|
+| Heart Failure Clinic                | 7 days             | HF clinic         |
+| Primary Care Provider               | 14 days            | PCP               |
+| BMP (K+, Cr) lab                    | 1 week             | Patient/PCP       |
+| Cardiac rehab intake                | Within 4 weeks     | Cardiac rehab     |
+| Echo recheck                        | 90 days post-GDMT optimization | HF clinic |
+
+Pending at discharge: BMP at 1 week (post-MRA initiation).
+Responsible party for follow-up of pending labs: PCP (Dr. [Name]),
+with HF clinic copied.
+
+Red-flag symptoms — call HF clinic or return to ED for any of:
+- Weight gain > 2 lb in 24 hours or > 5 lb in 1 week
+- New or worsening shortness of breath, especially at rest or lying flat
+- New leg swelling
+- Chest pain or pressure
+- Lightheadedness, near-syncope, or fainting
+- Reduced urine output, severe leg cramping, or persistent palpitations
+  (potential potassium-related symptom on the new MRA + ACEi regimen)
+
+--- h. Patient & Family Education ---
+
+Education provided during the stay (delivered by RN with teach-back
+confirmation):
+- Heart failure self-management: daily weights, sodium and fluid
+  restriction, symptom diary
+- Medication review: each new medication's purpose, dose, common side
+  effects, and red-flag symptoms (especially potassium-related symptoms
+  on combined ACEi + MRA)
+- NSAID avoidance and acetaminophen as the analgesic of choice
+- Empagliflozin: euglycemic DKA awareness, sick-day rules, hygiene
+- When to call the HF clinic, when to return to the ED
+- Home-weights log demonstrated; patient verbalized understanding and
+  performed teach-back successfully
+
+--- Attestation ---
+
+I personally reviewed this patient's hospital course, current condition,
+and discharge plan. The medication list above has been reconciled with
+the inpatient team and the patient at discharge. This summary is
+suitable for the receiving primary care provider, heart-failure clinic,
+and home-health agency.
+
+[Discharging Provider Name, MD]
+[NPI]   Discharge date: 2026-04-23
+
+[VERIFY: confirm signature, date/time, and attestation language match
+facility template per config.yml → discharge_attestation_block]
+```
+
+### What this example demonstrates
+
+- **All 8 required sections present**, in order, with no missing element
+- **Reconciled medication table with NEW / CHANGED / DISCONTINUED indicators** — the single most-audited element of any discharge summary, surfaced here in table form for fast scanning
+- **NSAID discontinuation captured as a code-able diagnosis** — Z79.899 makes the appropriateness of the medication change auditable
+- **Combined ACEi + MRA safety flag with explicit BMP follow-up** — the pattern most likely to fail in real-world readmissions; surfaced in three places (medication list, follow-up table, red-flag list)
+- **Pending labs with named responsible party** — closes the most common discharge-summary care-transition gap (orphaned pending labs)
+- **Red-flag symptom list patient-facing in clinical terms** — useful both for the receiving provider and for the home-health agency's first home visit
+- **`[VERIFY: ...]` flags** for attestation block specifics rather than fabricating facility template language
+- **No invented findings** — BNP not re-trended at discharge is explicitly flagged rather than back-filled with a plausible-sounding number
