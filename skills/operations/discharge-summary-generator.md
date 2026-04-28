@@ -4,7 +4,7 @@ category: operations
 tools: [claude, chatgpt]
 difficulty: beginner
 time_saved: "~20 min/summary"
-version: 1.1
+version: 1.2
 last_eval_score: 8.5
 ---
 
@@ -39,11 +39,24 @@ Provide the following:
 
 You are a skilled healthcare professional's AI assistant. Your job is to produce a complete, well-organized discharge summary from the raw clinical information provided.
 
-**Before you start:**
-- Load `config.yml` from the repo root for facility details, provider preferences, and formatting standards
-- Reference `knowledge-base/terminology/` for correct clinical terms and accepted abbreviations
-- Reference `knowledge-base/regulations/` for discharge documentation compliance requirements
-- Use the facility's communication tone from `config.yml` → `voice`
+**Before you start (personalization from `config.yml`):**
+
+Load `config.yml` from the repo root and reference `knowledge-base/terminology/` for correct clinical terms and accepted abbreviations and `knowledge-base/regulations/` for discharge documentation compliance requirements (CMS Conditions of Participation 42 CFR 482.43, Joint Commission discharge-summary standards, state-level transition-of-care requirements). Use the named hooks below for facility-specific behavior; when a hook is absent, fall back to the documented default and surface a `[VERIFY: ...]` flag rather than inventing a facility-specific value.
+
+- **`config.yml` → `practice_setting`** — `acute_hospital` (default), `critical_access_hospital`, `LTACH`, `IRF`, `SNF`, `surgical_center`, `psychiatric_hospital`, or `behavioral_health_unit`. Drives the section requirements (IRF requires functional-status documentation per CMS IRF-PAI; SNF requires a CAA-aligned summary; psychiatric and behavioral-health settings require a 42 CFR Part 2 cross-check), the medication-reconciliation depth, and the regulatory citation block in the attestation.
+- **`config.yml` → `discharge_attestation_block`** — facility-specific attestation language keyed by provider role (`attending_hospitalist`, `attending_specialist`, `app_with_collaborating_physician`, `resident_with_attending_cosignature`). Each entry includes provider name, credentials, NPI, and any state-specific countersignature language. The drafter selects by the discharging provider's role; if the role is unclear, it inserts a `[VERIFY: discharging-provider role]` flag and uses the attending block as a placeholder.
+- **`config.yml` → `medication_reconciliation_format`** — `table_with_status_tags` (default, includes a NEW / CHANGED / DISCONTINUED / UNCHANGED column), `inline_with_delta_paragraph`, or `dual_format` (table for the chart plus a patient-friendly inline list for the after-visit summary). Drives the rendering of the discharge medication section.
+- **`config.yml` → `red_flag_phrasing`** — facility-standard red-flag list seeded by service line (HFrEF: weight gain ≥ 2 lb in 24 h or ≥ 5 lb in 1 week, new dyspnea, lightheadedness; post-CABG: chest pain with diaphoresis, sternal-wound redness, fever; oncology: febrile neutropenia ANC < 500, severe diarrhea, severe mucositis; OB postpartum: heavy bleeding, severe headache, leg swelling, suicidal ideation; behavioral-health: SI, HI, withdrawal symptoms). The drafter starts from the matched service-line list and adds patient-specific items based on the hospital course; if no match, it produces a generic red-flag list and flags `[VERIFY: service-line-specific red flags]`.
+- **`config.yml` → `home_health_referral_template`** — agency-specific intake fields the receiving HHA expects (485 OASIS frequency requested, F2F encounter date, homebound-status documentation, telehealth-eligibility flag where applicable, primary diagnosis with ICD-10, secondary diagnoses, current functional status). When absent, the drafter produces a Medicare-conformant default and flags `[VERIFY: HHA-specific intake template]`.
+- **`config.yml` → `pending_lab_responsibility_default`** — which role owns pending-at-discharge labs and studies by default (`PCP` (most common), `discharging_hospitalist`, `consulting_specialist`, `receiving_facility`). Drives the "Responsible Party" column in the follow-up plan. If absent, default to `PCP` with a `[VERIFY: pending-lab ownership per facility transition policy]` flag.
+- **`config.yml` → `follow_up_window_defaults`** — service-line follow-up windows (HF clinic: 7 days; post-CABG: 14 days; oncology: per protocol; post-stroke: 7–14 days; psych: 7 days post-discharge per HEDIS FUH; OB postpartum: 21 days for high-risk + 6 weeks for routine). The drafter applies the matched window; if no match, it uses 14 days and flags `[VERIFY: service-line follow-up window]`.
+- **`config.yml` → `readmission_risk_flagging`** — practice-set rules for what triggers a readmission-risk callout in the safety-flags block (default trigger set if absent: 4-pt weight gain in 1 week on a HF patient; combined ACEi + MRA without 1-week BMP scheduled; eGFR < 30 with new nephrotoxic medication; polypharmacy ≥ 10 active medications; LACE+ score ≥ 11; HOSPITAL score in the high-risk band; ≥ 2 prior 30-day readmissions). When a trigger fires, the drafter surfaces it in the medication-reconciliation safety-flag block and the follow-up plan.
+- **`config.yml` → `confidentiality_overlays`** — `part_2_applicable` flag (when the discharging unit treats SUD), state confidentiality overlays (mental health, HIV, genetic, minor-consent, reproductive-health), and any state-specific behavioral-health-disclosure-on-discharge restriction. When overlay flags are present, the drafter routes the relevant content (SUD treatment details, behavioral-health diagnoses, genetic-test results) through a separately-segregated section labeled per overlay rather than the standard discharge body, and surfaces a `[VERIFY: 42 CFR Part 2 / state-overlay disclosure authorization]` flag.
+- **`config.yml` → `patient_facing_avs_flag`** — whether the skill should also produce a patient-facing After-Visit Summary alongside the clinical discharge summary (`true` (default for primary-care-aligned facilities), `false`, or `optional_on_request`). When `true`, the AVS uses 6th–8th grade reading level, the same red-flag list re-rendered in plain language, and a teach-back-confirmation checkbox.
+- **`config.yml` → `output_destination`** — `outputs/discharge-summaries/` (default), `clipboard`, or `ehr_template_format`.
+- **`config.yml` → `config_missing_behavior`** — `flag_and_proceed` (default — produce a complete summary with `[VERIFY: ...]` flags on every facility-specific element) or `block_and_ask` (return an "Information still needed" list before drafting).
+
+When `config.yml` is absent entirely, the drafter produces a complete acute-hospital discharge summary in eight sections with the table-format medication reconciliation, a generic red-flag list, PCP-default pending-lab ownership, 14-day generic follow-up, and `[VERIFY: ...]` flags on the attestation block, signature line, NPI, HHA template, and any state-overlay applicability decision. It never invents a facility name, provider name, NPI, attestation phrasing, HHA template, or 42 CFR Part 2 applicability flag.
 
 **Process:**
 
