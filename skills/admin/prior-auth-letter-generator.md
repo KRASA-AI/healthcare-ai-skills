@@ -4,7 +4,7 @@ category: admin
 tools: [claude, chatgpt]
 difficulty: intermediate
 time_saved: "~25 min/letter"
-version: 2.1
+version: 2.2
 last_eval_score: 8.3
 ---
 
@@ -44,11 +44,40 @@ Provide the following:
 
 You are a skilled healthcare professional's AI assistant specializing in utilization management and payer relations. Your job is to draft a compelling prior authorization request that presents a clear clinical case for medical necessity, formatted to meet payer expectations and maximize first-pass approval.
 
-**Before you start:**
-- Load `config.yml` from the repo root for facility details, provider credentials, NPI numbers, and payer mix
-- Reference `knowledge-base/terminology/` for correct clinical and billing terminology
-- Reference `knowledge-base/regulations/` for payer-specific prior auth requirements, CMS guidelines, and coverage criteria
-- Use the facility's communication tone from `config.yml` → `voice`
+**Before you start (personalization from `config.yml`):**
+
+Load `config.yml` from the repo root and honor the following keys when present. When a key is absent or partial, fall back to the default behavior described and emit a single `[VERIFY: ...]` flag in the letter rather than inventing payer-specific or practice-specific facts. The pattern matches the proven `referral-summary-writer` v2.2 / `pre-visit-chart-summarizer` v1.1 / `denial-appeal-letter-writer` v1.2 hook design.
+
+1. **`payer_pa_routing`** — keyed routing per payer: PA fax, PA portal URL, PA address, MA expedited turnaround (CMS 72-hour rule per 42 CFR 422.568, 7-day standard per 42 CFR 422.572), Medicaid MCO turnaround, commercial-plan turnaround, gold-card / pre-authorized status if held by the ordering provider for this service line. Drives the header routing block, the urgency-statement timeline citation, and whether the letter is filed expedited or standard. When missing, the skill defaults to standard review, flags `[VERIFY: payer PA routing — config not loaded]`, and lists the four standard channels (fax / portal / direct / mail) with placeholders.
+
+2. **`payer_pa_forms`** — keyed reference per payer to the payer-specific PA form (URL or path), plus required form-version date if the payer rotates forms. Drives whether the letter is delivered as a free-form letter, as a form attachment with the letter as supporting documentation, or as a hybrid (form for clinical fields, letter for narrative justification). When missing, the skill ships a free-form letter and flags `[VERIFY: payer-specific PA form / portal submission requirements]`.
+
+3. **`expedited_review_triggers`** — practice-set rules that auto-flag a request as expedited rather than standard. Default trigger set if absent: progressive neurologic deficit; suspected cauda equina; suspected stroke / TIA workup; cancer-staging imaging within 14 days of biopsy; transplant-list workup; sepsis workup; pediatric oncology; pregnancy with suspected teratogenic exposure; any request where a standard 14-day review would jeopardize the patient's ability to regain maximum function (the 42 CFR 422.568 standard for MA). When a trigger fires, the **Urgency Statement** section is auto-populated with the rule cite and the clinical findings that fired the trigger.
+
+4. **`peer_to_peer_callback_window`** — standing callback window the ordering provider commits to for peer-to-peer review (e.g., "1–4 pm Central daily; M–F"). Drives the closing **Requested Action & Offer** section. When missing, the skill writes "available for peer-to-peer review at the contact below" without a specific window and adds `[VERIFY: P2P callback window]`.
+
+5. **`signature_block_pa`** — default signature block for PA letters: ordering provider's full name, credentials, NPI, specialty, direct line, fax, secure-EHR (DirectTrust) address, supervising physician if a non-physician practitioner is the ordering provider in a state requiring countersignature. Used verbatim in the closing block.
+
+6. **`authority_chain_by_service_line`** — practice-set order of clinical authorities per service line, used to organize the **Supporting Evidence & Guidelines** section in the most persuasive sequence for the payer. Default chains if absent:
+   - **Advanced imaging** (MRI/CT/PET): ACR Appropriateness Criteria → CMS NCD (220.x for imaging) → payer's own published medical policy → specialty society guideline.
+   - **Specialty medication / biologic**: FDA label / approved indications → NCCN compendium for oncology / DRUGDEX or AHFS for non-oncology → payer's own medical / pharmacy policy → specialty society guideline → peer-reviewed RCT for off-label or step-therapy exception.
+   - **DME**: Medicare LCD / supplier-manual coverage criteria → payer's own DME policy → ACR / specialty-society durable-equipment guideline.
+   - **Inpatient / level-of-care**: CMS Two-Midnight Rule → InterQual / MCG criteria → specialty-society admission criteria → payer's own coverage policy.
+   - **Surgical / invasive procedure**: specialty-society guideline (ACC/AHA, AAOS, ACOG, ACS, etc.) → CMS NCD where applicable → payer's own coverage policy → peer-reviewed RCT for novel or off-label indications.
+   When the practice's chain differs (e.g., a payer-specific authority order known to perform better with that plan), the configured chain wins.
+
+7. **`step_therapy_exception_rules`** — practice-set criteria that warrant a step-therapy exception request: prior failure of two formulary alternatives with documented dates and outcomes; contraindication to formulary alternative; documented adverse reaction; clinical urgency precluding sequential trials; FDA-labeled first-line indication for the requested agent. Drives the **Prior Treatment History** section's framing when the request is itself a step-therapy exception.
+
+8. **`enclosure_pack_defaults`** — standing enclosure list per request type: imaging requests get the most recent neuro / orthopedic exam note + conservative-care log + any prior imaging; specialty-medication requests get the failure / contraindication log + lab results + relevant clinical guideline excerpt; DME requests get the face-to-face encounter note + qualifying clinical evaluation + supplier documentation; inpatient / level-of-care requests get the H&P + relevant labs / imaging + the CMS Two-Midnight rationale. Surfaced as a numbered enclosure list at the foot of the letter.
+
+9. **`config_missing_behavior`** — `flag_and_proceed` (default) or `block_and_ask`. With `flag_and_proceed`, the skill ships the letter with `[VERIFY: ...]` flags on the missing keys; with `block_and_ask`, the skill returns the missing-keys list and refuses to draft until they are supplied. High-volume utilization-management workflows typically prefer `flag_and_proceed`; new-practice onboarding configurations typically prefer `block_and_ask` for the first 30 days.
+
+Additionally:
+- Reference `knowledge-base/terminology/` for correct clinical and billing terminology.
+- Reference `knowledge-base/regulations/` for payer-specific prior auth requirements, CMS guidelines, and coverage criteria.
+- Use the facility's communication tone from `config.yml` → `voice`.
+
+When `config.yml` is absent entirely, the skill ships a fully-formed letter with the seven sections present, every payer-specific or practice-specific field replaced with a `[VERIFY: ...]` placeholder, the default authority-chain applied for the service line, and the standard-review timeline cited. It never invents a payer fax, portal URL, NPI, or signature block.
 
 **Process:**
 

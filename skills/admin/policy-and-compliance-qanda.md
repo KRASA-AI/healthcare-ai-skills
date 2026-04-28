@@ -4,7 +4,7 @@ category: admin
 tools: [claude, chatgpt]
 difficulty: intermediate
 time_saved: "~15 min/question"
-version: 2.0
+version: 2.1
 last_eval_score: null
 ---
 
@@ -49,6 +49,32 @@ Provide the following:
 7. **Urgency** — Is this a "real-time, patient is in the room" question, an operational question with hours-to-days tolerance, or a design question that can wait for counsel? Urgency drives the depth of the answer and the escalation language.
 
 If a question requires facts the user did not supply (e.g., "what state?" for a scope-of-practice question, or "how many records were involved?" for a breach risk assessment), the skill returns an **"Information still needed"** list before drafting the answer — never invents jurisdictional facts.
+
+## Before you start (personalization from `config.yml`)
+
+Load `config.yml` from the repo root and honor the following keys when present. When a key is absent or partial, fall back to the federal-default behavior described and emit a single `[VERIFY: ...]` flag in the answer rather than inventing jurisdictional facts. The pattern matches the proven `referral-summary-writer` v2.2 / `pre-visit-chart-summarizer` v1.1 / `denial-appeal-letter-writer` v1.2 hook design.
+
+1. **`practice_jurisdictions`** — primary state(s) and country, plus any state-plan OSHA jurisdictions where the practice operates (CA, OR, WA, AZ, NY public-employee, etc.). Default behavior when missing: answer to **federal law only**, mark every state-dependent paragraph `[VERIFY: state law — practice jurisdiction not in config]`, and surface a one-line "ask the user for state" prompt before the **Practical Application** section.
+
+2. **`setting_types`** — facility profile array (any of: outpatient practice, hospital, ASC, FQHC, RHC, dental, behavioral health, long-term care, telehealth-only, home health, school-based health, correctional health). Drives setting-specific applicability gates: EMTALA only triggers if `hospital` with an ED is in the array; CoPs vs. CfCs branches on `hospital` vs. `ASC`; dental and behavioral-health settings get the 42 CFR Part 2 / state-confidentiality cross-check by default.
+
+3. **`accreditation_bodies`** — Joint Commission / DNV / AAAHC / URAC / NCQA / HFAP / CARF, with current cycle date if known. Drives whether **[INDUSTRY STANDARD / ACCREDITATION]** sources are binding or best-practice for this practice and whether NPSGs / IM standards / EC standards / HR standards are surfaced in the answer.
+
+4. **`payer_mix`** — Traditional Medicare %, Medicare Advantage plans (named) %, Medicaid (state plan + MCOs named) %, commercial plans (named), TRICARE, VA, self-pay. Drives the order of the **CMS / Billing Sub-Process** payer-policy walk — MA-heavy panels get the MA-specific coverage-criteria layer surfaced before commercial; Medicaid-heavy panels get the state plan and MCO contract layer surfaced; self-pay-heavy panels get the No Surprises Act / good-faith estimate layer surfaced.
+
+5. **`compliance_owners`** — named owners with contact channel: `privacy_officer`, `compliance_officer`, `hipaa_security_officer`, `infection_preventionist`, `safety_officer`, `chief_nursing_officer`, `chief_medical_officer`, `outside_counsel_firm` (plus contact). Drives the **Escalation Path** so each escalation line names the actual owner ("Escalate to N. Patel, Privacy Officer, via [channel]") rather than the generic role. When missing, falls back to the role title and adds `[VERIFY: owner not configured]`.
+
+6. **`escalation_routing`** — practice-set rules for which question categories auto-route to which owner. Default mapping if absent: PHI / breach / patient complaint → Privacy Officer; OSHA / sharps / workplace violence → Safety Officer; coding / billing / E/M → Compliance Officer; scope-of-practice → Chief Nursing Officer for nursing scope, Chief Medical Officer for clinician scope; subpoena / fraud / investigation / media → Outside Counsel **immediately**; novel structural questions (MSO, JV, acquisition, AI deployment) → Outside Counsel.
+
+7. **`confidentiality_overlays`** — flags for when the stricter rule controls: `part_2_applicable: true|false` (whether the practice is a Part 2 program), `state_confidentiality_overlays` (mental health, HIV, genetic, minor-consent, reproductive-health overlays by state), `state_breach_thresholds` (the practice's state-specific breach-notification threshold and timeline if stricter than HIPAA's 60 days). When overlay flags are present, the **HIPAA-Specific Sub-Process** automatically extends step 5 (state law / Part 2 stricter rule) into a full sub-analysis rather than a one-line check.
+
+8. **`house_disclaimer_addendum`** — practice-specific addendum to the standard disclaimer (e.g., "Refer all litigation-related questions to [firm name] before responding to opposing counsel"). Appended verbatim after the standardized disclaimer; never replaces it.
+
+9. **`faq_library_path`** — path to the running FAQ in `outputs/compliance-qanda/`. When the answered question matches an existing FAQ entry, the skill cross-references the prior answer's date and notes whether any cited source has changed since (e.g., a new OCR FAQ, a state law revision) before delivering the answer — preventing re-litigation of settled questions and surfacing genuine changes.
+
+10. **`config_missing_behavior`** — `flag_and_proceed` (default) or `block_and_ask`. With `flag_and_proceed`, every config-dependent paragraph that defaults to federal law gets a `[VERIFY: ...]` flag and the answer still ships; with `block_and_ask`, the skill returns the **"Information still needed"** list and refuses to draft until config is supplied. Compliance officers running batch question-and-answer workflows typically prefer `flag_and_proceed`; new-practice onboarding configurations typically prefer `block_and_ask` for the first 30 days.
+
+When `config.yml` is absent entirely, the skill answers to federal law only, surfaces every state-dependent paragraph with a `[VERIFY: state law]` flag, names roles generically (Privacy Officer, Compliance Officer) without specific owners, and prepends a single sentence to the **Direct Answer**: *"This response is a federal-default answer; supply `practice_jurisdictions`, `accreditation_bodies`, and `compliance_owners` in `config.yml` for a fully personalized response."* It never invents a state, an accreditor, an owner, or an applicability flag.
 
 ## Instructions
 
