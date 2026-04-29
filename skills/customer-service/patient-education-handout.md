@@ -4,7 +4,7 @@ category: customer-service
 tools: [claude, chatgpt]
 difficulty: intermediate
 time_saved: "~20 min/handout"
-version: 2.0
+version: 2.1
 last_eval_score: null
 ---
 
@@ -46,6 +46,26 @@ Provide the following:
 If the topic requires specialty expertise the input does not supply (e.g., specific chemotherapy protocol, rare genetic condition, complex post-op instructions), the skill returns a **"Clinician input needed"** list rather than inventing clinical detail.
 
 ## Instructions
+
+**Before you start (personalization from `config.yml`):**
+
+Read these named hooks once. If a hook is absent, fall back to the default and surface every facility-specific element as a `[VERIFY: ...]` flag — never invent a clinician name, NPI, callback number, portal URL, after-hours policy, pharmacy partner, or facility-specific safety language.
+
+- `practice_specialty` — drives default topic library and tone (primary_care default; pediatrics; OB/GYN; cardiology; oncology; behavioral_health; endocrinology; orthopedics; dermatology; ED-discharge). Specialty seeds the default topic templates (e.g., asthma action plan + spacer technique for pediatrics; OB postpartum warning signs + lactation block for OB; chemo cycle + neutropenic-precaution block for oncology; SI-screening + 988 framing for behavioral health).
+- `reading_level_default` — `grade_6_8` (default per CMS / AHRQ / Joint Commission), `grade_5` for documented low-literacy populations, `grade_3_4` (caregiver-of-pediatric simplified). Apply Flesch-Kincaid check before delivery; replace Latinate words with shorter Anglo-Saxon equivalents.
+- `language_preferences_supported` — keyed list of languages the practice has certified-translation coverage for (e.g., `en`, `es`, `vi`, `zh-Hans`, `ar`, `ru`, `ht`, `tl`). For supported languages, produce the handout at the same reading level. For unsupported languages OR for high-stakes content (oncology, informed consent, complex surgical prep), produce English with translation-ready formatting and route through `certified_translation_workflow` rather than shipping a machine translation.
+- `clinician_signature_block` — keyed per signing clinician role (attending physician, NP, PA, RN-led education visit, MA-prepared handout that requires clinician sign-off) with name, credentials, NPI where applicable, and the practice's exact "Reviewed by" line wording.
+- `practice_contact_block` — main phone, after-hours line or policy, patient-portal name + URL, secure-message instructions, address. Used in §8 (Your Team and Next Steps). Never invent.
+- `crisis_line_overlay` — 911 default + 988 default + Poison Control 1-800-222-1222 default; appended state-specific or community-specific lines (e.g., state mobile-crisis line, IPV hotline, child-abuse hotline) when the topic warrants (behavioral health, pregnancy + IPV screening, pediatric).
+- `practice_voice` — `warm_plain` (default for adult patient), `caregiver_first` (pediatric / cognitively-impaired-adult caregiver), `clinical_warm` (post-op / oncology / cardiology where precision matters), `motivational_neutral` (substance-use / behavioral health, non-judgmental). Drives sentence rhythm and analogies.
+- `pharmacy_and_partner_block` — preferred local pharmacy, mail-order pharmacy, durable-medical-equipment partner, lab partner, imaging partner. Inserted when the handout references a specific service (e.g., glucose meter source, peak-flow-meter source).
+- `patient_facing_disclaimer_block` — facility-specific text ("This handout is for learning. It does not replace your clinician's advice…") plus any state-specific consent / advance-directive / minor-consent / reproductive-health language the practice appends.
+- `safety_critical_topic_gate` — topics that require explicit clinician-in-the-loop review BEFORE the handout leaves the practice (suicidal ideation, IPV, severe mental illness, complex pediatric dosing, oncology regimens, pregnancy-risk medications, controlled-substance taper, opioid-use-disorder bridging). Skill flags `[CLINICIAN MUST PERSONALIZE]` and refuses to ship without the flag cleared.
+- `21cca_information_blocking_default` — flag indicating that handouts attached to the chart will be visible to the patient via the portal in near-real time per the 21st Century Cures Act information-blocking rules; tunes language to be plain-direct rather than chart-shorthand.
+- `output_destination` — `outputs/`, `chart_attachment`, `portal_message_attachment`, `print_friendly_avs_addon`, `multilingual_pair` (English + supported translation), or `caregiver_packet`.
+- `config_missing_behavior` — `flag_and_proceed` (default — ship a complete handout with `[VERIFY: ...]` flags on every facility-specific element) vs. `block_and_ask`.
+
+When `config.yml` is absent entirely, ship a one-page primary-care handout at 6th–8th grade reading level in warm-plain voice with the AHRQ universal-precautions teach-back block, generic "Reviewed by: ___" sign-off, generic 911 / 988 / Poison Control crisis lines, and `[VERIFY: ...]` flags on every facility-specific element (clinician name, callback, after-hours policy, portal, pharmacy partner). Never invent a clinician name, NPI, callback number, portal URL, or pharmacy partner.
 
 Follow this eight-section handout template. Every handout is written at the specified reading level, uses plain language, and is formatted for readability (short sentences, headings, white space, bullet points, bolded key actions). Avoid clinical jargon unless it is named and defined.
 

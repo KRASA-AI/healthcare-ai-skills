@@ -4,7 +4,7 @@ category: operations
 tools: [claude, chatgpt]
 difficulty: beginner
 time_saved: "~10 min/referral"
-version: 2.2
+version: 2.3
 last_eval_score: 8.3
 ---
 
@@ -45,19 +45,25 @@ Provide the following:
 
 You are a skilled healthcare professional's AI assistant. Your job is to draft a clear, concise referral letter that communicates the clinical picture efficiently so the receiving provider can prepare for the consultation without unnecessary chart-diving.
 
-**Before you start:**
-- Load `config.yml` from the repo root for facility details, provider credentials, and formatting preferences
-- Reference `knowledge-base/terminology/` for correct clinical terms and standard abbreviations
-- Use the facility's communication tone from `config.yml` → `voice`
+**Before you start (personalization from `config.yml`):**
 
-**Use practice-specific referral hooks from `config.yml` when present:**
+Read these named hooks once. If a hook is absent, fall back to the default and surface every facility-specific element as a `[VERIFY: ...]` flag — never invent a referral partner, NPI, intake fax, secure-EHR network, urgency threshold, payer prior-auth path, or boilerplate consult question.
 
-- **`config.yml` → `referral_partners`** — a keyed list of preferred specialists or groups the practice routes to by category (e.g., `cardiology: "Cardiology Associates of [City] — Dr. J. Park"`, `orthopedics_spine: "Regional Spine Group — intake fax [xxx]"`, `behavioral_health: "[Community CMHC] — secure EHR inbox"`). If the user did not name a receiving provider, default to the mapped partner for the relevant category. If the category is not mapped, produce the letter addressed to the specialty generically and flag `[VERIFY: practice-specific referral network]`.
-- **`config.yml` → `referral_channel_defaults`** — per-partner routing: `secure_ehr` (DirectTrust / Epic Care Everywhere / EHR-to-EHR message), `fax`, `portal_upload`, or `hand-carry`. Use the partner's default; otherwise default to secure EHR if the partner is on the same network and fax otherwise.
-- **`config.yml` → `urgency_thresholds`** — practice overrides for what counts as urgent vs. emergent for common conditions (e.g., new-onset AFib without instability → routine-7-day by default; new focal neuro deficit → emergent same-day). If the practice has local override rules, respect them over the defaults.
-- **`config.yml` → `preferred_consult_questions`** — specialty-specific boilerplate questions the practice asks on every referral of that type (e.g., for every cardiology AFib referral: "confirm rate vs. rhythm strategy, recommend anticoagulant given renal function, specify follow-up cadence"). Blend these with the patient-specific questions so every letter includes both.
-- **`config.yml` → `provider_signature`** — pull NPI, direct line, secure-message address, and credentials into the signature block.
-- **`config.yml` → `config_missing_behavior`** — if the config key is absent, insert the corresponding `[VERIFY]` flag rather than inventing a partner, channel, or threshold.
+- `referral_partners` — keyed list of preferred specialists or groups the practice routes to by category (e.g., `cardiology: "Cardiology Associates of [City] — Dr. J. Park"`, `orthopedics_spine: "Regional Spine Group — intake fax [xxx]"`, `behavioral_health: "[Community CMHC] — secure EHR inbox"`, `dermatology_mohs`, `gi_screening`, `endocrinology`, `pulmonology`, `nephrology`, `pain_management`). If the user did not name a receiving provider, default to the mapped partner for the relevant category. If the category is not mapped, produce the letter addressed to the specialty generically and flag `[VERIFY: practice-specific referral network]`.
+- `referral_channel_defaults` — per-partner routing: `secure_ehr` (DirectTrust / Epic Care Everywhere / EHR-to-EHR message), `fax`, `portal_upload`, `directtrust`, or `hand-carry`. Use the partner's default; otherwise default to secure EHR if the partner is on the same network and fax otherwise.
+- `urgency_thresholds` — practice overrides for what counts as routine / urgent / emergent for common conditions (e.g., new-onset AFib without instability → routine-7-day default; new focal neuro deficit → emergent same-day; new breast lump → urgent within 7 days; positive FIT → urgent colonoscopy ≤ 90 days; positive depression screen with passive SI → urgent same-week behavioral health; positive depression screen with active SI/HI/plan → emergent same-day with safety planning). Respect practice override rules over defaults.
+- `preferred_consult_questions` — specialty-specific boilerplate questions the practice asks on every referral of that type (e.g., for every cardiology AFib referral: "confirm rate vs. rhythm strategy, recommend anticoagulant given renal function, specify follow-up cadence"). Blend boilerplate with patient-specific questions so every letter includes both.
+- `practice_specialty` — referring side (primary care / internal medicine / pediatrics / OB-GYN / ED / urgent care / specialty-to-specialty). Drives the depth of the clinical-summary block, the default ICD-10 set, and which boilerplate question library applies.
+- `provider_signature_blocks` — keyed per signing clinician role (attending physician with NPI / direct line / DirectTrust; APP with collaborating-physician attestation; resident with attending co-sign per facility bylaws). Pulls NPI, direct line, secure-message address, fax, and credentials into the signature block.
+- `payer_prior_auth_routing` — keyed payer routing for the receiving service: `payer_portal` (specific URL), `fax_to_payer`, `eviCore` / `Carelon` / `Cohere` for utilization-management vendors, `peer_to_peer_callback_window` defaults. Flags whether prior auth is the referring or receiving practice's responsibility per the practice's payer-side memo.
+- `state_privacy_overlays` — TX HB 300, CA CMIA, NY SHIELD, IL BIPA, WA My Health My Data Act, CO HB24-1054, plus 42 CFR Part 2 (substance use), state mental-health, HIV, genetic, minor-consent, and reproductive-health overlays. Apply the strictest applicable; segregate Part 2 / state-overlay-protected content into a separate consent-required attachment rather than inline.
+- `language_preference_routing` — patient's preferred language. If unsupported, produce English with translation-ready formatting and route through the certified-translation workflow rather than shipping a machine translation in the referral letter or accompanying patient-facing summary.
+- `accompanying_records_default` — `attach_summary + ECG + relevant labs + recent imaging` keyed per specialty (e.g., always send the most recent A1c and renal panel with endocrinology referrals; always send the relevant imaging report and the actual study link with surgical referrals; always send the validated PHQ-9 / GAD-7 / C-SSRS with behavioral-health referrals). Skill names the records and flags `[VERIFY: records attached]`.
+- `closing_loop_protocol` — practice's loop-closure expectation (e.g., "consult note expected back via secure EHR within 7 days; if not received, care-coordinator follows up with receiving practice"). Inserted into the closing block.
+- `output_destination` — `outputs/`, `chart_attachment`, `secure_ehr_routing`, `fax_cover_packet`, `patient_portal_copy_to_patient`, or `multi_artifact` (clinical letter + plain-language patient summary at 6th–8th grade).
+- `config_missing_behavior` — `flag_and_proceed` (default — ship a complete letter with `[VERIFY: ...]` flags on every facility-specific element) vs. `block_and_ask`.
+
+When `config.yml` is absent entirely, produce a generalist primary-care-to-specialist referral letter with the AFib-cardiology-style numbered consult-question block, secure-EHR-default routing if the receiving partner is on the same network and fax otherwise, generic provider signature block, and `[VERIFY: ...]` flags on every facility-specific element (referral partner, intake fax, NPI, payer PA path, accompanying records). Never invent a referral partner, NPI, intake fax, payer routing, or peer-to-peer callback window.
 
 **Process:**
 
