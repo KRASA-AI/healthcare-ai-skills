@@ -4,8 +4,8 @@ category: admin
 tools: [claude, chatgpt]
 difficulty: intermediate
 time_saved: "~15 min/question"
-version: 2.1
-last_eval_score: null
+version: 2.2
+last_eval_score: 8.90
 ---
 
 # ⚖️ Policy & Compliance Q&A
@@ -232,6 +232,125 @@ seeing tomorrow?"
 6. DISCLAIMER
    [standard disclaimer per template]
 ```
+
+### Second Example — CMS Billing Sub-Process (Incident-To Supervision)
+
+The second example demonstrates the **CMS / Billing Sub-Process**. Incident-to billing is one of the most frequently misunderstood Medicare rules and one of the most common sources of billing compliance risk in multi-provider outpatient practices.
+
+```
+QUESTION
+A biller at an outpatient internal medicine practice in Texas asks:
+"Our PA saw an established patient for a chronic-disease follow-up visit
+while Dr. Reyes was seeing another patient in the adjacent exam room. Can
+we bill this visit incident-to Medicare under Dr. Reyes's NPI?"
+
+1. DIRECT ANSWER
+   No — not on these facts. Medicare's incident-to rule requires Direct
+   Supervision: the billing physician must be physically present in the
+   office suite and immediately available, but the rule does NOT require
+   the physician to be in the same room. "Seeing another patient in the
+   adjacent exam room" satisfies the Direct Supervision standard only if
+   Dr. Reyes was in the suite, immediately available, and not so occupied
+   that she could not intervene without abandoning her own patient — which
+   is a factual question your practice must be able to document. If Dr.
+   Reyes was in the office suite and immediately available, incident-to
+   billing is permitted for this established-patient chronic-disease visit.
+   If she was in a separate building, at a satellite location, or
+   not immediately available, it is not. Bill the PA under the PA's own
+   NPI if there is any doubt.
+
+2. SOURCES
+   [STATUTE / REGULATION]
+   - Social Security Act §1861(s)(2)(A) — defines "incident to" physician
+     services as a covered Medicare benefit.
+   - 42 CFR §410.26 — the governing regulation; requires Direct Supervision
+     (defined at 42 CFR §410.32(b)(3)(ii)) for incident-to services
+     furnished in the office or clinic setting.
+
+   [OFFICIAL GUIDANCE]
+   - Medicare Benefit Policy Manual (MBPM), Chapter 15, §60.1 — definitive
+     CMS guidance on incident-to requirements: (a) the service must be
+     an integral part of the physician's personal professional service or
+     follow a course of treatment established by the physician; (b) the
+     supervising physician must be physically present in the office suite
+     and immediately available; (c) the PA must be an employee, leased
+     employee, or independent contractor of the billing physician or group.
+   - CMS MLN Matters SE0441 (updated) — "Incident-To" services: clarifies
+     that Direct Supervision does not require the physician to be present
+     in the room but does require the physician to be physically present
+     in the office suite and immediately available.
+   - OIG Work Plan (recurring) — incident-to billing is a perennial OIG
+     audit target; overpayments are a routine finding when the supervising
+     physician was absent from the office suite at the time of service.
+
+   [INDUSTRY STANDARD]
+   - MGMA and AAFP practice-management guidance on incident-to billing:
+     recommends a real-time supervision log or EHR attestation capturing
+     the supervising physician's name and on-site presence for every
+     incident-to service billed.
+
+   [UNCERTAIN / CONFLICTING]
+   - Medicare Advantage: MA plans may impose stricter supervision rules
+     or may not recognize incident-to billing at all under their own
+     coverage policies. Verify with the specific MA plan before billing
+     under the physician NPI for an MA patient.
+   - Whether Dr. Reyes was "immediately available" while seeing another
+     patient in an adjacent room is a factual determination, not a legal
+     bright line. A physician who is in the suite and not performing a
+     procedure is generally considered immediately available; one performing
+     a time-sensitive procedure is not. Document the factual record.
+
+3. CONFIDENCE: MEDIUM
+   The federal rule (42 CFR §410.26 + MBPM Ch. 15 §60.1) is HIGH confidence
+   on the Direct Supervision standard. Whether the specific facts of this
+   visit meet that standard is a factual determination — MEDIUM confidence
+   without a full practice-supervision-log review.
+
+4. PRACTICAL APPLICATION
+   - Require a real-time supervision log or EHR attestation for every
+     incident-to visit: supervising physician name, confirmation of
+     physical presence in the office suite at time of service, and
+     "immediately available" attestation.
+   - Do not bill incident-to when: the supervising physician is at a
+     different physical location (satellite office, hospital, home), is
+     on a break off-site, or is performing a procedure during which
+     interruption would be clinically unsafe.
+   - For new-patient visits or new problems for established patients,
+     incident-to billing is NOT permitted — the treating physician must
+     personally perform and document the service. Bill the PA under the
+     PA's own NPI for these visits; reimbursement will be at 85% of the
+     physician fee schedule, but the compliance risk is eliminated.
+   - Action owners: Billing Manager (audit current incident-to claims for
+     supervision compliance); Compliance Officer (update billing policy
+     and PA supervision agreement to reflect Direct Supervision standard);
+     Practice Administrator (circulate a one-page checklist to clinical
+     staff summarizing when incident-to billing is and is not appropriate).
+   - Retention: supervision log or EHR attestation for every incident-to
+     service billed; retain with the claim record.
+
+5. ESCALATION PATH
+   - Escalate to the Compliance Officer for a retrospective claims audit
+     if the practice cannot confirm the supervising physician's on-site
+     presence documentation for prior incident-to claims — retroactive
+     overpayments carry a 60-day self-disclosure window under the CMS
+     Self-Referral Disclosure Protocol and the OIG Self-Disclosure Protocol.
+   - Escalate to outside counsel if any incident-to overpayment is material
+     or if there is reason to believe the billing pattern was knowing or
+     reckless (False Claims Act risk).
+   - No state-board escalation required for the billing question itself;
+     Texas does not impose additional incident-to rules beyond 42 CFR §410.26.
+
+6. DISCLAIMER
+   [standard disclaimer per template]
+```
+
+### What this second example demonstrates
+
+- **CMS / Billing Sub-Process in action** — the four-lane sub-process (coverage → coding → payment → enrollment) is exercised: the coverage lane (incident-to as a covered Medicare benefit), the payment lane (85% vs 100% fee schedule), and the MA distinction are all addressed.
+- **Source-hierarchy tier discipline** — the answer cites statute (§1861), regulation (42 CFR §410.26), CMS manual guidance (MBPM Ch. 15 §60.1), and an MLN Matters article — each labeled by authority tier, with the UNCERTAIN / CONFLICTING tier used correctly for the factual determination and the MA caveat.
+- **Confidence label calibration** — the underlying rule is HIGH confidence; the application to a specific factual scenario is MEDIUM confidence. The distinction matters: staff can rely on the rule but must document the facts.
+- **Practical Application with named owners** — the Billing Manager, Compliance Officer, and Practice Administrator each get a specific action item; this is the pattern that makes the skill immediately usable rather than informational-only.
+- **Escalation path with stakes quantified** — the 60-day self-disclosure window and the False Claims Act risk are named, giving the Compliance Officer the information they need to prioritize a retrospective audit decision.
 
 ## Notes on Use
 
