@@ -4,7 +4,7 @@ category: operations
 tools: [claude, chatgpt]
 difficulty: intermediate
 time_saved: "~15 min/note"
-version: 2.2
+version: 2.3
 last_eval_score: 8.4
 ---
 
@@ -302,3 +302,179 @@ provider.
 - **MDM-supported E/M** — moderate-complexity MDM is documented with explicit reasoning (multiple chronic conditions, one uncontrolled, prescription drug management with monitoring), letting the provider land the level call defensibly
 - **ICD-10 only where confident** — I10, E66.811, R73.03 included; no codes guessed beyond what the dictation supports
 - **Attestation block** — present and ready for the provider's signature
+
+### Second worked example — telehealth follow-up note (v2.3 addition)
+
+The first example covers the highest-volume in-person note type (SOAP for an established-patient hypertension follow-up in primary care). The second worked example below covers the highest-volume telehealth note type — a behavioral-health medication-management follow-up across state lines — because the telehealth lane is where the skill's distinct hooks (`telehealth_attestation_addendum`, `attestation_block` for licensure, state-licensure `[VERIFY]` flag, virtual-exam-limitation language, time-based E/M as the typical telehealth coding path) actually fire and where ambient/AI drift risk is concentrated on attestation completeness rather than physical-exam fabrication.
+
+**Input dictation (from the provider):**
+
+```
+Telehealth f/u, 34F, MDD on sertraline 100mg QAM x 8 wks, started at 50mg
+4 wks ago titrated to 100. PHQ-9 today 6 (was 14 at start, 10 at 4-wk).
+Sleep improved, appetite back, no SI/HI, no s/e other than mild AM nausea
+resolved. No EtOH, no other meds. Patient in TX, I'm in CO, video-audio
+confirmed, lighting and privacy ok, pt verbalized consent for telehealth at
+visit start. No exam vitals — pt does not have home BP cuff. Continue
+sertraline 100 QAM. PHQ-9 in 4 wks via portal. Safety plan reviewed,
+copy in chart. Total time 22 min counseling and coordination. Pt agreed
+to f/u via telehealth in 4 wks.
+```
+
+**Generated telehealth note:**
+
+```
+=== Clinical Progress Note — Telehealth Visit ===
+
+Patient: [Name] | DOB: [yyyy-mm-dd] | MRN: [xxxxx]
+Encounter date: 2026-05-18      Visit type: Telehealth, established
+Provider: [Name, credentials]   Specialty: Behavioral Health
+Chief complaint: Follow-up for major depressive disorder on sertraline.
+
+--- Telehealth Attestation ---
+
+This visit was conducted via synchronous two-way audio-video using
+[Platform — VERIFY: facility telehealth platform per
+telehealth_attestation_addendum]. Patient was located in Texas; provider
+was located in Colorado at the time of the encounter. Patient verbalized
+consent for telehealth at the start of the visit and was informed of the
+limitations of virtual care and of alternative in-person options. Audio
+and video quality were adequate for the clinical encounter throughout.
+Privacy of the patient's environment was confirmed by the provider.
+
+[VERIFY: provider licensed in patient's state (TX) at time of encounter
+per state licensure attestation block]
+
+--- Subjective ---
+
+HPI:
+The patient is a 34-year-old woman with major depressive disorder,
+returning for the 8-week follow-up after initiation of sertraline. She
+was started at 50 mg PO QAM four weeks before this visit and titrated to
+100 mg PO QAM at the 4-week visit; she has been on the 100 mg dose for
+four weeks today. She reports continued improvement in mood, return of
+appetite, and improved sleep continuity. She denies suicidal ideation,
+homicidal ideation, plan, or intent. She reports the early-treatment
+nausea has fully resolved. She denies new side effects, denies alcohol
+use, denies new over-the-counter or supplement use.
+
+ROS (pertinent to today's complaint):
+- Constitutional: No fatigue beyond baseline; appetite restored
+- Psychiatric: Improved mood, improved sleep, no SI/HI, no anxiety
+  escalation
+- Gastrointestinal: No nausea (resolved), no GI bleeding signs
+- Sexual: [VERIFY: not addressed in dictation — sexual side effects of
+  SSRIs are standard ROS at this visit type; document if asked]
+All other systems reviewed and negative.
+
+PMH: Major depressive disorder, single episode, in partial remission on
+sertraline.
+Medications: Sertraline 100 mg PO QAM. No other prescription
+medications, no OTC, no supplements, no alcohol. Allergies: NKDA.
+
+--- Objective ---
+
+Vitals: Not obtained this visit — patient does not have home blood
+pressure cuff or scale; vitals deferred to next in-person or
+care-coordinated visit per `safety_critical_clarification_rules`
+behavioral-health telehealth default.
+
+Validated screen:
+- PHQ-9 today: 6 (mild range)
+- PHQ-9 trend: 14 at initiation → 10 at 4 weeks → 6 at 8 weeks
+  (consistent and clinically significant response on sertraline 100 mg)
+- C-SSRS today: not endorsed (no current ideation, no past-month ideation)
+  [VERIFY: confirm C-SSRS administered per facility behavioral-health
+  protocol if not in dictation]
+
+Mental Status Exam (limited by telehealth):
+- Appearance: Well-groomed, age-appropriate, no distress visible on
+  video
+- Behavior: Cooperative, good eye contact via camera
+- Speech: Normal rate, rhythm, prosody
+- Mood/Affect: Mood "much better"; affect congruent, full range
+- Thought process: Linear, goal-directed
+- Thought content: No suicidal or homicidal ideation, no delusions, no
+  hallucinations reported
+- Cognition: Alert, oriented x3 by conversational assessment
+- Insight/Judgment: Good
+[VERIFY: limited components of MSE that require in-person observation
+(gait, full motor exam, complete cognitive screen) are deferred per
+telehealth limitations]
+
+--- Assessment ---
+
+1. Major depressive disorder, single episode, in partial remission on
+   sertraline (ICD-10: F32.5 — partial remission). PHQ-9 score of 6 with
+   a sustained downward trajectory from baseline of 14 represents a
+   clinically meaningful and statistically significant response;
+   patient is approaching but has not yet met criteria for full
+   remission (PHQ-9 < 5). Continue current regimen for an additional
+   4-week observation window before considering further titration or
+   step-down planning.
+
+Differential / clinical reasoning: Treatment response is on the expected
+trajectory for an SSRI initiated 8 weeks ago at adequate dose; no signs
+of treatment-emergent suicidality, no serotonin-syndrome features, no
+adherence concerns. Continued single-agent therapy at the current dose
+is the guideline-supported next step rather than augmentation,
+combination, or switch.
+
+--- Plan ---
+
+1. Major depressive disorder:
+   - Continue sertraline 100 mg PO QAM, no change
+   - Repeat PHQ-9 in 4 weeks via patient portal questionnaire
+   - Telehealth follow-up in 4 weeks
+   - Safety plan reviewed today; copy in chart; patient confirmed she
+     knows how to reach crisis line (988) and the practice's after-hours
+     line. Will contact same-day if any return of suicidal ideation,
+     marked sleep disruption, or worsening mood.
+   - Counseling and education: SSRI side-effect monitoring,
+     sertraline-NSAID interaction warning, do-not-stop-abruptly
+     guidance, alcohol cautions
+
+Follow-up: 4 weeks via telehealth; portal PHQ-9 1 week before visit.
+Return precautions: Return sooner or call if return of suicidal
+ideation, severe sleep disruption, new mania symptoms, or any new
+medication added by another provider.
+
+E/M elements documented (provider to confirm level — time-based path
+typical for behavioral-health telehealth follow-ups):
+- HPI: extended (4+ elements — onset, duration, severity, modifying
+  factors)
+- ROS: pertinent (4 systems reviewed)
+- MSE: focused, video-limited
+- MDM: moderate complexity — chronic condition in partial remission,
+  prescription drug management continued, validated screen reviewed
+- Total time (counseling and coordination): 22 minutes documented
+- Counseling/coordination >50% of total time: yes
+[VERIFY: confirm code as 99213 vs. 99214 per provider's MDM judgment;
+99214 defensible on time-based path with 22 minutes total and
+counseling-dominant; CMS telehealth modifier (95) and POS (10 home / 02
+other-than-home) per current OPPS/MPFS guidance]
+
+--- Attestation ---
+
+I personally evaluated this patient via synchronous audio-video
+telehealth, reviewed the data above, and developed the assessment and
+plan documented. Note dictated and reviewed by provider.
+
+[Provider Name, credentials]
+[NPI]   Encounter date: 2026-05-18
+[State of provider: CO]   [State of patient: TX]
+[Telehealth platform: VERIFY]
+```
+
+### What this second example demonstrates
+
+- **Telehealth attestation block fires** — the `telehealth_attestation_addendum` config hook drives the dedicated attestation section at the top of the note (platform, provider/patient location, video-audio confirmation, consent, environmental privacy). The note does not bury the platform statement in the closing line; it leads with it because telehealth E/M billing depends on it.
+- **State-licensure `[VERIFY]` flag** — the dictation states the provider is in CO and the patient is in TX, so the skill surfaces `[VERIFY: provider licensed in patient's state (TX) at time of encounter]` rather than asserting licensure it cannot confirm. This is the state-licensure-aware verify pattern from the `telehealth_attestation_addendum` hook description.
+- **Vitals omission handled correctly** — the patient does not have a home BP cuff, so vitals are explicitly deferred with the operational rationale rather than fabricated. Demonstrates the "do not invent or infer clinical findings not present in the source material" rule under telehealth-specific conditions where structured vitals are often unavailable.
+- **MSE adapted to virtual limits** — components observable on video (appearance, behavior, speech, affect, thought process/content, cognition by conversation) are documented; components requiring in-person observation (gait, full motor, complete cognitive screen) are explicitly flagged as deferred. Demonstrates the "Any limitations of virtual exam noted" requirement under the telehealth note structure.
+- **Validated screen embedded in Objective, not Subjective** — PHQ-9 today, the 8-week trajectory, and C-SSRS are placed in Objective because they are validated instruments, not patient self-report narrative. This is the subjective-vs-objective discipline rule applied to a behavioral-health context.
+- **Safety-critical clarification rules respected** — the dictation reports no SI/HI; the note repeats this discretely in three places (HPI, MSE thought content, Plan safety review) because suicidal-ideation status is on the default `safety_critical_clarification_rules` list and the note must make the absence-of-SI assertion impossible to miss for any future reviewer of the chart.
+- **Time-based E/M path surfaced** — for behavioral-health telehealth where counseling and coordination typically dominate, the note documents total time and the counseling-percentage threshold rather than forcing a key-component-based level call. Demonstrates `em_documentation_standard=time_based_optional` behavior. The note also calls out the telehealth modifier and POS verify line.
+- **No fabrication of facility-specific values** — telehealth platform name, NPI, state-licensure attestation, and exact telehealth-modifier guidance are all flagged `[VERIFY: ...]` rather than invented.
+
+Together the two worked examples now demonstrate the skill's range across the two highest-volume note types in modern outpatient practice: an in-person primary-care SOAP (Example 1) and a cross-state telehealth behavioral-health follow-up (Example 2). Together they exercise the full set of twelve `config.yml` hooks (`practice_specialty`, `default_note_type`, `voice_and_tone`, `approved_abbreviations`, `em_documentation_standard`, `attestation_block`, `telehealth_attestation_addendum`, `icd10_strictness`, `safety_critical_clarification_rules`, `verify_flag_threshold`, `output_destination`, `config_missing_behavior`) with at least one example each — closing the worked-example debt that previously limited specificity scoring.

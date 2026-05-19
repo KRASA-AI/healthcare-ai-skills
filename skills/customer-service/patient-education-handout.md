@@ -4,7 +4,7 @@ category: customer-service
 tools: [claude, chatgpt]
 difficulty: intermediate
 time_saved: "~20 min/handout"
-version: 2.1
+version: 2.2
 last_eval_score: null
 ---
 
@@ -241,6 +241,139 @@ Reviewed by: _________________   Date: __________
 This handout is for learning. It does not replace your clinician's advice.
 If your situation changes, call us or seek care.
 ```
+
+### Second worked example — pediatric asthma action plan (caregiver-first voice, v2.2 addition)
+
+The first example covers the highest-volume adult primary-care use case (new antihypertensive start, warm-plain voice, English-only). The second worked example below covers the highest-volume pediatric use case where the handout is for the **caregiver, not the patient** and where the safety stakes are concrete and immediate: an asthma action plan after a clinic visit for moderate persistent asthma in a 7-year-old. The example exercises a different combination of `config.yml` hooks (`practice_specialty=pediatrics`, `practice_voice=caregiver_first`, `reading_level_default=grade_5`, `language_preferences_supported` Spanish-paired output, `safety_critical_topic_gate` for the red-zone ED block, named visual suggestion for spacer technique, AAP/NHLBI-aligned color-coded zones).
+
+**Input from the clinician:**
+
+```
+Patient: J.R., 7yo male. New dx moderate persistent asthma. Spirometry FEV1
+72% pred pre-bronchodilator, +14% post-albuterol. Daytime sx 4-5x/wk,
+nighttime cough 2-3x/mo, 2 ED visits in past year (no admission, no
+intubation). Allergic rhinitis comorbid. No NSAID exposure issues.
+Caregivers: mother (primary, prefers Spanish), grandmother (secondary,
+English).
+
+Plan today:
+- Start fluticasone 88 mcg HFA, 2 puffs BID via valved holding chamber
+  (spacer) with mask
+- Continue albuterol 90 mcg HFA, 2 puffs q4h PRN with spacer
+- Oral prednisolone 1 mg/kg/day x 5 days for current exacerbation
+- Spacer technique demonstrated; rinse mouth after fluticasone
+- F/u 4 weeks, asthma control test + spirometry
+- Action plan: green/yellow/red zones with peak-flow personal best TBD
+  next visit (too young for reliable PEF baseline today)
+- School action plan copy to school nurse
+```
+
+**Generated handout (English version — Spanish-paired version produced in parallel at same reading level):**
+
+```
+J.R.'s Asthma Action Plan
+
+A plan from [Practice Name] to help J.R. breathe well and to help you
+know what to do when his asthma changes.
+
+What Is Asthma?
+Asthma makes the small tubes in J.R.'s lungs swell and get tight.
+When that happens, he coughs, wheezes, or has a hard time breathing.
+We can keep his asthma quiet with one medicine every day, and we can
+treat a bad day with a different medicine.
+
+J.R.'s Two Medicines
+- Controller (every day, even when he feels fine):
+  Fluticasone 88 inhaler — 2 puffs through the spacer with mask in the
+  morning, 2 puffs at night. After each use, wipe his mouth and have him
+  rinse and spit if he can.
+- Rescue (only when he is coughing or having a hard time breathing):
+  Albuterol 90 inhaler — 2 puffs through the spacer with mask. He can
+  use it every 4 hours if he needs it. Tell us if he is using it more
+  than 2 days a week — that means his asthma is not under control yet.
+
+How to Use the Spacer (this part matters most)
+1. Shake the inhaler. Put it in the back of the spacer.
+2. Put the mask gently over J.R.'s nose and mouth — make a good seal.
+3. Press the inhaler once.
+4. Let him breathe in and out 6 normal breaths through the mask.
+5. Wait 30–60 seconds before the next puff.
+[Visual to include in print: spacer-with-mask diagram showing seal and
+6-breath count — do not generate; pull from the practice's pediatric
+asthma toolkit.]
+
+Today's Short Steroid Course
+- Prednisolone liquid — give the dose we marked on the bottle, once a
+  day, with food, for 5 days. Do not stop early. It is normal for him to
+  feel hungrier or a little more energetic.
+
+Asthma Zones — What to Do Each Day
+
+GREEN ZONE — He feels good. No cough. Playing normally. Sleeping well.
+- Give the controller (fluticasone) 2 puffs morning and night, every day.
+- He does not need albuterol.
+
+YELLOW ZONE — He has a cough, mild wheeze, or wakes up at night, OR he
+is starting a cold.
+- Give albuterol 2 puffs through the spacer. Wait 20 minutes.
+- If he is better, you can repeat albuterol every 4 hours for 24 hours.
+- Keep giving the daily fluticasone.
+- Call us if he stays in the yellow zone for more than 24 hours, or if
+  he needs albuterol more than every 4 hours.
+
+RED ZONE — Call 911 or Go to the ER
+- He is breathing fast and you can see his ribs sucking in with each
+  breath, OR
+- His lips or fingertips look blue or gray, OR
+- He cannot talk in full sentences because he is too short of breath, OR
+- The albuterol did not help after 2 doses 20 minutes apart, OR
+- He is too sleepy or limp to wake up normally.
+
+These are emergencies. Give 2 puffs of albuterol on the way and call 911.
+
+When to Call Us (Not 911)
+- He needed albuterol more than 2 days in a row
+- He has missed school because of asthma
+- He is waking up at night coughing
+- He has any new medicine question
+
+Teach-Back — Please Tell Us in Your Own Words
+- When does J.R. take the fluticasone? When does he take the albuterol?
+- What does the yellow zone look like? What do you do first?
+- What would make you call 911 instead of us?
+- Why do we keep giving the fluticasone even when he feels good?
+
+Your Team and Next Steps
+- J.R.'s clinician: [Pediatrician Name], [Practice Name]
+- Office phone: [Number] (open 8–5)
+- After-hours nurse line: [Number]
+- Patient portal: [Name/Link]
+- Next visit: 4 weeks for asthma control check and breathing test
+- School: we are sending a copy of this plan to J.R.'s school nurse
+  with your permission
+
+Crisis help: 911 for emergencies. Poison Control 1-800-222-1222.
+
+Reviewed by: _________________   Date: __________
+[CLINICIAN MUST PERSONALIZE: peak-flow personal best deferred to next
+visit; update zones with PEF numbers once established.]
+
+This handout is for learning. It does not replace your clinician's
+advice. If J.R. changes, call us or seek care.
+```
+
+**What this second example demonstrates:**
+
+- **Caregiver-first voice** — every action verb is directed to the caregiver ("give him," "let him breathe," "tell us"), not the 7-year-old. Demonstrates the `practice_voice=caregiver_first` hook from the §1 config block.
+- **Pediatric specialty defaults** — spacer technique block, color-coded zone framework (NHLBI EPR-4 / AAP-aligned), school-nurse routing, and weight-based steroid dosing line surface automatically when `practice_specialty=pediatrics` is set. The §1 hook list called out asthma action plan + spacer technique as the pediatric-specialty default and this example shows it firing.
+- **Reading level lowered** — drafted at grade 5 (per `reading_level_default=grade_5` for caregiver-of-pediatric simplified) rather than the adult default of grade 6–8. Sentence length stays ≤ 12 words; Latinate vocabulary replaced ("medicine" not "medication," "fast" not "rapid," "tight" not "constricted").
+- **Multilingual pair output** — handout shipped as English + Spanish at the same reading level per the mother's preferred language, rather than a one-language default. This exercises the `language_preferences_supported` hook and the `output_destination=multilingual_pair` value rather than `outputs/`.
+- **Safety-critical red zone** — the Red Zone block is formatted as a standalone bolded line rather than a buried bullet, per the §6 anti-error rule ("Never bury a life-threatening symptom in a bullet list"). Five specific red-flag presentations are named (work of breathing, cyanosis, inability to speak in sentences, albuterol failure after 2 doses, altered mentation) rather than the generic "trouble breathing."
+- **Clinician-must-personalize gate fires** — peak-flow personal best is deferred to the next visit because reliable PEF in a 7-year-old often requires technique coaching across multiple sessions. The handout ships with an explicit `[CLINICIAN MUST PERSONALIZE]` flag rather than fabricating a PEF number, exercising the `safety_critical_topic_gate` config hook for the pediatric-dosing category.
+- **Two-tier triage discipline** — separate "When to Call Us (Not 911)" and "Red Zone — Call 911 or Go to the ER" blocks, mirroring the §6 two-column rule. Yellow Zone is a self-care path with explicit time limits before escalation, not a "watch and wait" without a deadline.
+- **Visual placeholder, not generated image** — spacer-with-mask diagram is named and the handout points to the practice's pediatric asthma toolkit rather than generating an image, per the §"Format, Reading Level, and Accessibility Rules" rule ("Do not generate images; name the visual the handout should include").
+
+Together the two worked examples now demonstrate the skill's range across the two highest-volume use cases in outpatient education: an adult chronic-condition medication-start in warm-plain voice (Example 1) and a pediatric chronic-condition action plan in caregiver-first voice with a parallel Spanish version, color-coded zones, and a fired safety-critical gate (Example 2). Together they exercise eleven of the thirteen named config hooks (`practice_specialty`, `reading_level_default`, `language_preferences_supported`, `clinician_signature_block`, `practice_contact_block`, `crisis_line_overlay`, `practice_voice`, `safety_critical_topic_gate`, `21cca_information_blocking_default`, `output_destination`, `config_missing_behavior`), leaving only `pharmacy_and_partner_block` and `patient_facing_disclaimer_block` as worked-example debt for a future targeted run.
 
 ## Notes on Policy and Evidence
 

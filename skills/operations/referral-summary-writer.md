@@ -4,7 +4,7 @@ category: operations
 tools: [claude, chatgpt]
 difficulty: beginner
 time_saved: "~10 min/referral"
-version: 2.3
+version: 2.4
 last_eval_score: 8.3
 ---
 
@@ -178,3 +178,192 @@ Direct: [phone] • Secure message: [link]
 ```
 
 The example illustrates the target: one page, CHA₂DS₂-VASc / HAS-BLED / eGFR surfaced, explicit numbered consultation questions, and a clearly stated patient preference — everything the specialist needs to prepare.
+
+### Second worked example — urgent behavioral-health referral with 42 CFR Part 2 segregation (v2.4 addition)
+
+The first example covers the highest-volume cardiology-referral pattern (new-onset AFib, routine urgency, single payer lane, no privacy-overlay complexity). The second worked example below covers the highest-stakes behavioral-health referral pattern — a positive depression screen with passive suicidal ideation in a patient with a documented past SUD treatment episode — because that combination exercises three of the skill's most distinctive `config.yml` hooks (`urgency_thresholds` for behavioral-health escalation, `state_privacy_overlays` for the 42 CFR Part 2 segregation rule, `accompanying_records_default` for the PHQ-9/GAD-7/C-SSRS attachment) and the `multi_artifact` output destination (clinical letter + patient-facing 6th–8th grade plain-language summary).
+
+**Input from the referring clinician (primary care):**
+
+```
+Patient: K.S., 41F. Annual visit today.
+PHQ-9 today: 19 (moderately severe). Item 9 (SI): "several days" — passive
+SI, no plan, no intent, no access to means per discussion. C-SSRS: passive
+ideation only, no intent, no plan; 3 prior episodes of depression treated
+to remission with sertraline. No SI in past 3 months until past 2 weeks.
+GAD-7: 12 (moderate anxiety).
+PMH: MDD (recurrent, currently mod-severe), GAD, alcohol use disorder
+(in sustained remission x 4 years, completed IOP at [Community SUD
+program] in 2022 — Part 2 protected). HTN well controlled.
+Meds: lisinopril 10. No psych meds currently (off sertraline x 18 mo
+after 2-yr remission).
+Social: divorce in process, oldest child moving out, working full time.
+Strong support: sister local, weekly AA attendance.
+Patient agrees to behavioral-health referral, prefers same-week
+intake, prefers telehealth. No firearms in home (asked and confirmed).
+Safety planning template completed today; safety plan copy to chart.
+Lethal-means restriction discussed re medications (locked away with
+sister this week).
+Referring to: [Community CMHC behavioral health] via secure EHR
+inbox. Routing pre-approved by patient. Sister has consent to be
+named contact. Send patient-facing copy of summary via portal at
+6th–8th grade reading level.
+```
+
+**Generated clinical referral letter (artifact 1 of 2):**
+
+```
+[Practice Letterhead — from config.yml]
+
+2026-05-18
+
+Behavioral Health Intake
+[Community CMHC] — Secure EHR Inbox (Direct Trust)
+Referral routing pre-confirmed with patient
+
+RE: Referral for K.S. — moderately severe depression with passive
+suicidal ideation, urgent intake within 7 days
+
+Behavioral Health Intake Team,
+
+I am referring K.S. (DOB 1985-02-XX, MRN 5582XXXX) for urgent intake
+within 7 days for moderately severe depression with new passive
+suicidal ideation. Patient is clinically stable today, has agreed to
+the referral, prefers telehealth intake, and has completed a
+safety plan in our office. C-SSRS today does not meet emergent
+same-day criteria (no intent, no plan, no access to means; lethal
+means restriction in place); urgency tier is set to "urgent same-week"
+per practice behavioral-health threshold for passive SI without plan
+or intent.
+
+Active problems relevant to referral
+- Major depressive disorder, recurrent, current episode moderately
+  severe (F33.1) — PHQ-9 today 19; new passive SI past 2 weeks
+- Generalized anxiety disorder (F41.1) — GAD-7 today 12
+- Hypertension (I10), controlled on lisinopril 10 mg daily
+
+Current medications
+- Lisinopril 10 mg daily. No current psychiatric medications.
+- 18 months off sertraline (prior 2-year remission), no current taper
+  symptoms.
+
+Validated screens (attached separately)
+- PHQ-9 today: 19 (moderately severe)
+- PHQ-9 trajectory: not on file for past 12 months — today's score is
+  baseline for this episode
+- GAD-7 today: 12 (moderate)
+- C-SSRS today: passive ideation only, no intent, no plan, no access
+  to means; lethal means restriction in place (firearms confirmed
+  absent from home; medications relocated to sister's residence)
+
+Recent functional context (non-Part 2)
+- Three prior MDD episodes treated to remission with sertraline; off
+  18 months after a 2-year remission window
+- Concurrent psychosocial stressors: divorce in process, child
+  transition out of home
+- Strong protective factors: stable employment, sister local and named
+  as safety contact (consent on file), weekly community support group
+  attendance
+
+What we are asking
+1. Same-week intake (within 7 days) for full diagnostic evaluation and
+   treatment-plan recommendations.
+2. Confirm whether to resume sertraline at the previously effective
+   dose vs. trial alternative SSRI/SNRI given the 18-month interval
+   and current symptom severity.
+3. Recommend therapy modality and cadence (CBT vs. brief
+   problem-solving therapy vs. integrated care) given the
+   psychosocial stressors and the patient's stated preference for
+   telehealth.
+4. Establish follow-up cadence and define the loop-closure
+   expectation back to primary care; we expect the consultation note
+   via secure EHR within 7 days of intake.
+
+Safety planning today
+- Standard 6-step safety plan completed in clinic; copy in chart.
+- Lethal means restriction implemented (firearms confirmed absent;
+  medications relocated to sister's residence).
+- Crisis-line review: 988, local mobile-crisis line, and our
+  after-hours nurse line.
+- Patient verbalized understanding and contracted for safety.
+
+A separate consent-required addendum contains substance-use history
+relevant to clinical decision-making under 42 CFR Part 2. Please
+request that addendum through the consent-required intake channel
+rather than relying on the body of this letter; patient has signed the
+practice's general HIPAA release but the Part 2 release is keyed to
+the receiving facility.
+
+Records included with this letter (general consent)
+- Today's PHQ-9, GAD-7, C-SSRS forms
+- Safety plan (signed)
+- Current medication list
+- Most recent BMP and LFTs (2026-04 — within normal limits)
+
+Records NOT included in this letter (consent-required, request
+separately)
+- 2022 SUD treatment-completion summary from [Community SUD program]
+- Any Part 2-protected SUD treatment history or attendance records
+
+Patient preferences
+- Telehealth intake preferred
+- Sister consented as emergency contact
+- Patient prefers same-week scheduling and is available
+  weekday afternoons
+
+Please return the consultation note to my direct EHR inbox within 7
+days. I am available at [direct line] for warm handoff or peer
+discussion.
+
+Thank you for seeing her.
+
+[Referring Provider Name], MD
+[Practice Name] • NPI [##########]
+Direct: [phone] • Secure message: [DirectTrust link]
+```
+
+**Generated patient-facing summary (artifact 2 of 2 — `output_destination=multi_artifact`):**
+
+```
+Your Next Steps — Behavioral Health Visit
+
+We are setting up a visit with the Community Mental Health team. They
+will help you with the low mood and anxiety we talked about today.
+
+What we sent them
+- Your scores from today's mood and anxiety questions
+- The safety plan you and I wrote together
+- Your medicine list
+
+When you will hear from them
+- Within 7 days. You will get a call or a portal message to set up the
+  visit. You asked for video — we sent that request along.
+
+What to do until then
+- Use the safety plan if your thoughts get heavier. The crisis line is
+  988 — you can call or text any time.
+- Keep your sister in the loop the way we talked about.
+- If you feel unsafe before the intake call, contact us, call 988, or
+  go to the nearest emergency room.
+
+Who to call
+- Our office (during the day): [Number]
+- After hours: [Number]
+- Crisis: 988 (call or text), or 911 if there is an emergency
+
+[Reviewed by [Clinician]   Date: ______]
+This is a summary. It does not replace the visit notes in your chart.
+```
+
+### What this second example demonstrates
+
+- **Urgency-thresholds hook fires correctly** — the dictation reports passive SI without plan or intent and with lethal-means restriction in place. The skill maps this to the practice's "urgent same-week behavioral health" tier from `urgency_thresholds`, not to "emergent same-day" (which would apply only with active SI, plan, or intent), and not to "routine." Demonstrates correct calibration to the named threshold rather than defaulting to maximum urgency.
+- **42 CFR Part 2 segregation enforced** — the patient's 2022 SUD treatment history is Part 2-protected. The skill writes the body of the referral letter without inline Part 2 content, references the existence of a consent-required addendum, and tells the receiving facility how to request it through a Part 2-compliant intake channel. Demonstrates the `state_privacy_overlays` hook applying the strictest applicable overlay (42 CFR Part 2 is stricter than HIPAA for SUD treatment information) and segregating into a separate consent-required attachment rather than inline.
+- **Accompanying-records default exercised** — the validated PHQ-9, GAD-7, and C-SSRS are listed as included records per the behavioral-health default in `accompanying_records_default`; the Part 2-protected SUD treatment-completion summary is explicitly listed as NOT included per the segregation rule above.
+- **Numbered consult-question block** — four specific clinically actionable questions: intake cadence, medication restart vs. switch with the 18-month interval as the decision driver, therapy modality, and loop-closure cadence. Demonstrates both the `preferred_consult_questions` boilerplate-blending (intake-cadence and loop-closure are practice-boilerplate for behavioral-health referrals) and patient-specific questions (sertraline restart vs. alternative for this patient's specific history).
+- **Safety planning surfaced inline** — the safety plan completed in-clinic, the lethal-means restriction (firearms and medications), and the crisis-line review are stated inline rather than buried, so the receiving intake team can confirm continuity of safety planning at first contact rather than re-doing it. This is the behavioral-health-specific extension of the §"Workup & Findings" block.
+- **Multi-artifact output destination fires** — the `output_destination=multi_artifact` value produces both the clinical referral letter for the receiving CMHC and a separate patient-facing summary at 6th–8th grade reading level for the portal copy, exercising the multi-artifact path rather than the default single-letter path. The patient-facing summary explicitly names 988, the crisis path, the sister's role, and the safety plan without repeating any Part 2-protected detail.
+- **Closing-loop protocol surfaced** — the letter explicitly names the expected loop-closure cadence (consult note via secure EHR within 7 days of intake) per the practice's `closing_loop_protocol` setting; the care-coordinator-follow-up clause is implied rather than restated since the letter is going to the receiving facility, not to internal staff.
+- **No fabrication** — referring practice NPI, exact DirectTrust link, after-hours number, and CMHC intake confirmation number are not invented; the patient's MRN and DOB middle digits are abbreviated to `XXXX` pending the actual chart pull, mirroring the AFib example's approach.
+
+Together the two worked examples now demonstrate the skill's range across the two most operationally distinct referral patterns in outpatient practice: a routine cardiology referral with single-payer lane and no privacy-overlay complexity (Example 1), and an urgent behavioral-health referral with 42 CFR Part 2 segregation, multi-artifact output, named urgency-threshold tier, and inline safety-planning surfacing (Example 2). Together they exercise eleven of the thirteen named config hooks (`referral_partners`, `referral_channel_defaults`, `urgency_thresholds`, `preferred_consult_questions`, `practice_specialty`, `provider_signature_blocks`, `state_privacy_overlays`, `accompanying_records_default`, `closing_loop_protocol`, `output_destination`, `config_missing_behavior`), leaving `payer_prior_auth_routing` and `language_preference_routing` as worked-example debt for a future targeted run.
