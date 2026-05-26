@@ -4,8 +4,8 @@ category: _shared
 tools: [claude, chatgpt]
 difficulty: beginner
 time_saved: "~15 min/meeting"
-version: 2.2
-last_eval_score: 8.5
+version: 2.3
+last_eval_score: 9.0
 ---
 
 # 📝 Meeting Summarizer
@@ -132,7 +132,7 @@ Healthcare meetings range from 15-minute huddles to formal peer-review proceedin
 
 ## Example Output
 
-Two worked examples covering the two healthcare meeting types where format mistakes cause the most downstream damage: a peer-review-privileged Morbidity & Mortality (M&M) conference (where blame language and routine-ops co-mingling can pierce the privilege) and a multidisciplinary Tumor Board (where the recommendation must be capturable in a form the treating team can act on without ambiguity).
+Three worked examples covering the three healthcare meeting types where format mistakes cause the most downstream damage: a peer-review-privileged Morbidity & Mortality (M&M) conference (where blame language and routine-ops co-mingling can pierce the privilege); a multidisciplinary Tumor Board (where the recommendation must be capturable in a form the treating team can act on without ambiguity); and a payer Joint Operating Committee (JOC) meeting (where PHI must stay out, the voice is metric-first, and contractual-cycle items have to be distinguished from operational service items).
 
 ### Example 1 — Morbidity & Mortality (peer-review privileged)
 
@@ -365,4 +365,117 @@ Pre-reads:    new case presentations × 3; OPRA-style surveillance
 availability before the patient's first medical-oncology consult]
 ```
 
-The two examples illustrate the target across the format-sensitive ends of the spectrum: an M&M conference where the privilege label, system-and-process framing, and separation between privileged minutes and the safety-event report are load-bearing; and a Tumor Board where the recommendation is structured to copy directly into the patient's chart, the dissenting view is recorded, the pending data points that could modify the plan are named, and every action item has a single owner with a date.
+### Example 3 — Payer Joint Operating Committee (JOC) (metric-first, no PHI, contractual + operational mix)
+
+**Input bullets:** 2026-05-14 quarterly JOC, 60 min, hybrid (in-person + Teams). Counterparty: BlueShield Mid-Atlantic Commercial + MA. Practice attendees: R. Iyer (Revenue Cycle Director, chair on practice side); D. Park (Director of Operations); A. Romero, MD (CMO); J. Nguyen (Coding & CDI manager). Payer attendees: K. Mendez (Provider Relations Lead); T. Brooks (UM Medical Director, MD); H. Singh (Network Contracting Manager); one analytics observer. Agenda items: (1) Q1 2026 PA turnaround performance vs. contractual SLA — practice presents an average 4.2 business-day turnaround on commercial PA decisions vs. the contractual 2-business-day SLA, with the commercial musculoskeletal-imaging cohort as the slowest sub-segment; payer concedes vendor migration in February and commits to a written improvement plan by 2026-06-15. (2) Peer-to-peer (P2P) scheduling — practice raises that 38% of P2P requests are scheduled outside the requested 1–4 PM clinical window; payer agrees to add an after-hours block and an asynchronous-P2P pilot. (3) Downcoding trend — practice presents a 14% YoY increase in 99214 → 99213 commercial downcodes for non-procedural office visits; payer denies a policy change and commits to a sample-pull review using six de-identified claim examples (no PHI shared at JOC; claim examples submitted via the secure portal post-meeting). (4) MA risk-adjustment HCC chart-chase support — payer requests practice participation in a Q3 retrospective sweep; practice declines until rate concessions on the commercial fee schedule are re-opened in Q4. (5) CMS-0057-F PA disclosure compliance status — payer confirms January 1, 2026 effective date posture and the AI-decision-reasoning disclosure field on the PA decision letter; no concerns raised. (6) Renewal cycle — current commercial agreement evergreens 2026-12-31; either party may issue a renegotiation notice by 2026-09-30. Open question: whether the practice will exercise the renegotiation notice given the downcoding trend and the PA SLA performance. No PHI at any point in the discussion; case examples handled as aggregate metrics or de-identified claim references. Action items: payer side — written PA improvement plan by 2026-06-15 (K. Mendez); after-hours P2P block live by 2026-07-01 (T. Brooks); sample-pull downcoding review by 2026-07-15 (T. Brooks). Practice side — submit six de-identified claim examples for downcoding review by 2026-05-28 (J. Nguyen); decision on commercial renegotiation notice by 2026-09-15 (R. Iyer + A. Romero); board update on JOC outcomes at the next practice leadership meeting 2026-05-28 (R. Iyer). Confidentiality: routine JOC — no peer-review privilege; no PHI; subject to the BAA and the JOC governance section of the master services agreement.
+
+```
+QUARTERLY JOC — BLUESHIELD MID-ATLANTIC × [PRACTICE NAME]
+[Confidentiality: routine JOC governance — no PHI in this summary. Subject
+to the BAA dated [VERIFY: BAA effective date] and the JOC governance
+section of the master services agreement. NOT peer-review privileged.]
+
+EXECUTIVE SUMMARY
+Q1 2026 quarterly JOC reviewed PA turnaround (4.2 business days actual
+vs. 2 business-day contractual SLA — payer to deliver a written
+improvement plan by 2026-06-15), commercial peer-to-peer scheduling
+(38% scheduled outside the requested clinical window — payer to add an
+after-hours block and an asynchronous-P2P pilot by 2026-07-01), and
+a 14% YoY commercial 99214 → 99213 downcoding trend (payer to run a
+sample-pull review on six de-identified claim examples by 2026-07-15).
+The practice declined the Q3 MA HCC retrospective-sweep ask pending
+commercial-fee-schedule discussions in Q4. The commercial renegotiation-
+notice decision is parked for the 2026-05-28 practice leadership meeting.
+
+MEETING METADATA
+Date / Time:    2026-05-14 · 13:00–14:00
+Type:           Quarterly Joint Operating Committee (standing)
+Format:         Hybrid (in-person at practice HQ + Microsoft Teams)
+Facilitator:    R. Iyer — Revenue Cycle Director (practice side chair)
+Scribe:         J. Nguyen — Coding & CDI Manager
+Practice attendees:    R. Iyer (Revenue Cycle Director); D. Park
+                       (Director of Operations); A. Romero, MD (CMO);
+                       J. Nguyen (Coding & CDI Manager)
+Payer attendees:       K. Mendez (Provider Relations Lead);
+                       T. Brooks, MD (UM Medical Director);
+                       H. Singh (Network Contracting Manager);
+                       one analytics observer (non-decision)
+Confidentiality: JOC governance — no PHI; subject to BAA and MSA JOC
+                section. NOT peer-review privileged. Distribute to
+                practice leadership and the payer contract file only.
+
+DECISIONS
+1. NO contractual changes made at this meeting. All decisions documented
+   below are operational service-level commitments and one parked
+   contractual decision.
+2. ACCEPTED — Payer commitment to deliver a written PA improvement plan
+   covering the musculoskeletal-imaging cohort by 2026-06-15.
+3. ACCEPTED — Payer commitment to (a) add an after-hours P2P block
+   (16:00–18:00 ET) live by 2026-07-01, and (b) pilot an asynchronous-
+   P2P workflow for non-emergent commercial PA reviews, with pilot
+   evaluation at the next quarterly JOC.
+4. PRACTICE DECLINED — Q3 2026 MA HCC retrospective chart-chase
+   participation, pending commercial-fee-schedule discussions in Q4.
+   Disposition: revisit at the Q3 quarterly JOC (2026-08-13).
+5. PARKED — Commercial renegotiation notice (renewal date 2026-12-31;
+   notice deadline 2026-09-30). Practice leadership to decide by
+   2026-09-15.
+
+ACTION ITEMS
+| # | Action                                                    | Owner               | Due       | Status   |
+|---|-----------------------------------------------------------|---------------------|-----------|----------|
+| 1 | Submit six de-identified claim examples for downcoding    | J. Nguyen           | 2026-05-28| Open     |
+|   | review via the payer secure portal (no PHI in JOC record) |                     |           |          |
+| 2 | Deliver written PA-improvement plan (MSK imaging focus)   | K. Mendez (payer)   | 2026-06-15| Open     |
+| 3 | Activate after-hours P2P block 16:00–18:00 ET             | T. Brooks (payer)   | 2026-07-01| Open     |
+| 4 | Launch async-P2P pilot for non-emergent commercial PAs    | T. Brooks (payer)   | 2026-07-01| Open     |
+| 5 | Run downcoding sample-pull review and return findings     | T. Brooks (payer)   | 2026-07-15| Open     |
+| 6 | Decide on commercial renegotiation notice for 2026-12-31  | R. Iyer + A. Romero | 2026-09-15| Open     |
+| 7 | Brief practice leadership on JOC outcomes and the         | R. Iyer             | 2026-05-28| Open     |
+|   | renegotiation-notice decision framing                     |                     |           |          |
+
+DISCUSSION & CONTEXT (non-decision content — aggregate metrics only)
+- PA performance: 4.2-business-day average commercial PA turnaround vs.
+  the 2-business-day contractual SLA in Q1 2026. Slowest sub-segment
+  is commercial musculoskeletal imaging (5.8-day average). Payer
+  attributes the variance to a February UM-platform vendor migration
+  and commits to a written plan by 2026-06-15.
+- P2P scheduling: 38% of P2P requests in Q1 were scheduled outside the
+  practice's requested 1–4 PM clinical window. Practice volume: 142
+  P2P requests in Q1. Payer agreed to an after-hours P2P block and an
+  async-P2P pilot.
+- Downcoding trend: 14% YoY increase in commercial 99214 → 99213
+  downcodes for non-procedural office visits. Practice will submit
+  six de-identified claim examples (no PHI in JOC; via the secure
+  portal). Payer denies a policy change; a sample-pull review will
+  return by 2026-07-15.
+- MA HCC retrospective sweep: Q3 ask declined by practice. Disposition
+  contingent on Q4 commercial-fee-schedule discussions.
+- CMS-0057-F compliance: payer confirms January 1, 2026 posture; the
+  AI-decision-reasoning disclosure field is present on the PA decision
+  letter; no concerns raised by either side. The practice's
+  `denial-appeal-letter-writer` and `prior-auth-letter-generator` skills
+  already accommodate this disclosure pattern.
+
+OPEN QUESTIONS / PARKING LOT
+- Whether to exercise the commercial renegotiation notice by 2026-09-30
+  given the PA SLA performance and the downcoding trend. Park to the
+  practice leadership meeting 2026-05-28.
+- Whether to expand the async-P2P pilot to MA after the commercial
+  pilot evaluation at the Q3 JOC.
+- Whether the MA HCC retrospective ask returns in Q4 as part of the
+  fee-schedule discussion or remains contingent on commercial terms.
+
+NEXT MEETING
+2026-08-13 · 13:00–14:00 · same hybrid setup (quarterly cadence)
+Pre-reads:  Payer PA-improvement plan deliverable (Mendez)
+            Async-P2P pilot interim data (Brooks)
+            Downcoding sample-pull review findings (Brooks)
+            Practice Q2 commercial PA / downcoding metrics (Iyer)
+
+[VERIFY: BAA effective date and MSA JOC governance section reference
+before circulating this summary outside the practice leadership and
+payer contract file]
+```
+
+The three examples illustrate the target across the most format-sensitive ends of the healthcare-meeting spectrum: an M&M conference where the privilege label, system-and-process framing, and separation between privileged minutes and the safety-event report are load-bearing; a Tumor Board where the recommendation is structured to copy directly into the patient's chart, the dissenting view is recorded, the pending data points that could modify the plan are named, and every action item has a single owner with a date; and a payer JOC where PHI is rigorously excluded, the voice is metric-first, contractual-cycle items (renewal notice deadlines, BAA references, MSA governance sections) are distinguished from operational service items (PA SLA, P2P scheduling, downcoding sample review), and the action-item owners are split cleanly between the payer side and the practice side.

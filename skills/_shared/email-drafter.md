@@ -4,8 +4,8 @@ category: _shared
 tools: [claude, chatgpt]
 difficulty: beginner
 time_saved: "~10 min/email"
-version: 2.2
-last_eval_score: 8.3
+version: 2.3
+last_eval_score: 9.0
 ---
 
 # ✉️ Email Drafter
@@ -140,7 +140,7 @@ Patient communication via email and portal is a tracked patient-experience measu
 
 ## Example Output
 
-Three worked examples covering the three most common healthcare email channels: patient portal follow-up, provider-to-provider referral confirmation, and payer appeal follow-up. Each was produced from a short bullet-point input and is ready for clinician review.
+Four worked examples covering the four most distinct healthcare email lanes: patient portal follow-up (warm, plain, ≤8th-grade); provider-to-provider referral confirmation (clinical, numbered questions, identifiable-minimum PHI); payer appeal follow-up (formal, ask-first, peer-to-peer offer); and an external-care-partner SNF transition email (coordination-focused, patient identifier + date range, attachments referenced). Each was produced from a short bullet-point input and is ready for clinician review.
 
 ### Example 1 — Patient portal follow-up (hypertension, new lisinopril start)
 
@@ -242,4 +242,59 @@ Phone: [number] • Fax: [number]
 
 `[VERIFY: appeal reference number and submission confirmation on file]`
 
-The three examples illustrate the target across the most common channels: patient-appropriate reading level and a single clear next step; provider-to-provider brevity with numbered questions and identifiable-minimum PHI; payer correspondence that buries no ask and offers peer-to-peer without pleading.
+### Example 4 — External care partner: SNF post-discharge transition (CHF, home-health to SNF redirect)
+
+**Input bullets:** Patient initials R.K., DOB 03/1955, MRN last 4 = 4417; discharged from inpatient 2026-05-22 for acute on chronic HFrEF; SNF admission 2026-05-22 at Maple Ridge Post-Acute (case manager: L. Carter, RN); 7-day HF-clinic follow-up scheduled 2026-05-29; pending BMP at 1 week (post-spironolactone initiation); discharge weight 84.5 kg; attachments to send: discharge summary, reconciled MAR, daily weight log template; channel: secure email TLS (BAA on file 2025-09-02); recipient role: SNF care coordinator.
+
+```
+Subject: Care Transition — R.K., DOB 03/55, MRN 4417 — DC 05/22, HF-clinic 05/29
+
+L. Carter, RN — SNF Case Management,
+
+Sending the transition packet for R.K. (DOB 03/1955, MRN [last 4] 4417),
+discharged from our inpatient HM service on 2026-05-22 to Maple Ridge
+Post-Acute for short-stay HF rehabilitation and weights monitoring.
+Anticipated SNF length of stay: 10–14 days.
+
+Key handoff items:
+- Diagnosis: acute on chronic HFrEF (LVEF 30%), AKI resolved, NSAID
+  discontinued at discharge
+- Discharge weight: 84.5 kg (admission 90.3 kg; net −5.8 kg over 4 days)
+- New medications requiring SNF monitoring: spironolactone 25 mg daily
+  (added) + lisinopril 20 mg daily (up-titrated) — BMP due 2026-05-29
+  for K+ and Cr; please draw with the pre-clinic labs
+- Sodium ≤ 2 g/day; fluid restriction ≤ 2 L/day; daily weights at the
+  same time and on the same scale
+- Red-flag triggers requiring HF-clinic page before the scheduled visit:
+  weight gain ≥ 2 lb in 24 h or ≥ 5 lb in 1 week, new DOE at rest or
+  orthopnea, K+ outside 3.5–5.0, Cr rise > 30% from 1.1 baseline
+
+Follow-up scheduling:
+- HF clinic visit 2026-05-29 at 09:30 (Dr. M. Chen). Please arrange
+  transport and send the BMP result to the clinic by 08:00 that morning.
+- PCP visit 2026-06-05 (Dr. A. Romero). The SNF can keep R.K. enrolled
+  through that date if rehab goals require it.
+
+Attachments enclosed:
+1. Discharge summary (signed) — 4 pp
+2. Reconciled MAR — 1 p
+3. Daily-weight log template + sodium/fluid education sheet — 2 pp
+
+Point of contact: I am the discharging hospitalist; clinic follow-up is
+owned by Dr. M. Chen at the HF clinic. Please route urgent clinical
+questions to the HF clinic on-call line at [phone] and copy me on any
+medication changes during the SNF stay so the chart stays current.
+
+Thank you,
+
+K. Nguyen, MD   NPI [##########]
+Hospital Medicine, [Practice Name]
+Direct: [phone]   Secure: [DirectTrust address]
+
+[Confidentiality footer from config.yml]
+```
+
+`[VERIFY: BAA on file with Maple Ridge Post-Acute (BAA dated 2025-09-02 per practice_recipient_directory)]`
+`[VERIFY: SNF case manager email — confirm against the agency directory before sending PHI]`
+
+The four examples illustrate the target across the four distinct healthcare email lanes: patient-appropriate reading level and a single clear next step; provider-to-provider brevity with numbered questions and identifiable-minimum PHI; payer correspondence that buries no ask and offers peer-to-peer without pleading; and external-care-partner coordination that names the receiving role, the date range, the attachments, and the contact-of-record without dumping the full clinical course.
