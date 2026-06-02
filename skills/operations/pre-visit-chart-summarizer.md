@@ -4,8 +4,8 @@ category: operations
 tools: [claude, chatgpt]
 difficulty: beginner
 time_saved: "~10 min/patient"
-version: 1.1
-last_eval_score: 8.5
+version: 1.2
+last_eval_score: 9.0
 ---
 
 # 📊 Pre-Visit Chart Summarizer
@@ -98,7 +98,11 @@ You are a skilled healthcare professional's AI assistant. Your job is to distill
 
 ## Example Output
 
-Worked example: 90-second pre-visit summary for a complex chronic-care follow-up — the highest-volume primary-care archetype and the one where chart-diving on the way to the room costs the most time. The example uses `appointment_type_emphasis: chronic_care_followup`, `panel_quality_programs: { medicare_aco: "ACO REACH — [Network]" }`, `provider_focus_overrides: ["always surface CKD trend (eGFR/UACR)", "always surface PHQ-9 if last administered > 12 months"]`, and the default `time_target: 90` seconds.
+The two worked examples below exercise four of the seven `appointment_type_emphasis` paths — `chronic_care_followup` and `medicare_awv` directly, plus the `transition_of_care` sub-branch and the implied default by contrast — across two different attribution programs (ACO REACH commercial-MA vs. MIPS-reporting traditional Medicare) and two different per-provider override profiles. Example 1 is the highest-volume primary-care archetype (complex chronic-care follow-up). Example 2 is the highest-volume Medicare-clinic archetype (first-time AWV stacked against a recent discharge and an active SDOH risk score).
+
+### Example 1 — Complex chronic-care follow-up (T2DM + HTN + CKD3a + GAD, ACO REACH-attributed)
+
+Uses `appointment_type_emphasis: chronic_care_followup`, `panel_quality_programs: { medicare_aco: "ACO REACH — [Network]" }`, `provider_focus_overrides: ["always surface CKD trend (eGFR/UACR)", "always surface PHQ-9 if last administered > 12 months"]`, and the default `time_target: 90` seconds.
 
 **Input (raw chart paste):**
 ```
@@ -233,3 +237,284 @@ Read time target: 90 sec  ·  Generated 2026-04-25 06:55 from chart paste
 ```
 
 The example illustrates the target: a **scannable** one-page summary that hits the six sections, surfaces a **worsening renal trend** the provider would otherwise have to derive from the lab table, flags the **stale PHQ-9** per the per-provider override, **labels every ACO-relevant care gap** with the program-specific measure ID (CDC: EED, COL-E, etc.) so the visit can close them, **respects the practice's config-driven emphasis profile** for chronic-care follow-up (trended labs + titration window + adherence signal), and reserves three explicit `[VERIFY: ...]` flags for the items the chart paste alone does not resolve.
+
+### Example 2 — First-time Medicare AWV with recent discharge + active SDOH risk (71F traditional Medicare, MIPS-reporting, PRAPARE tier 2)
+
+Uses `appointment_type_emphasis: medicare_awv` (primary path) layered with the `transition_of_care` sub-branch (discharge 11 days ago, inside the 7-day-FUH measurement window when the visit was scheduled), `panel_quality_programs: { mips: { reporting_year: 2026, measure_set: ["CDC: HbA1c poor control", "BCS-E", "COL-E", "CDP", "DSF"] } }`, `risk_stratification_inputs: { hcc_raf_delta: true, prapare_tier: "active", chf_readmit_risk: true }`, `provider_focus_overrides: ["always surface CHF readmission-risk score when present", "always surface advance-care-planning eligibility on AWV"]`, `panel_voice: "explanatory, family-medicine attending"`, and `time_target: 120` seconds (the panel's AWV-day override). The AWV-day target is 120 sec rather than 90 because the AWV requires HRA, cognitive screen, and ACP-eligibility surfacing.
+
+**Input (raw chart paste):**
+```
+Patient: Ethel Washington, 71F, est'd patient, MRN 0824XXXX, traditional Medicare
++ Plan G supplement. PCP: J. Park, MD.
+Visit reason today (2026-04-30): scheduled Initial AWV (G0438) — pt has never had an AWV;
+also stands as post-discharge 7-day FUH visit (discharge 2026-04-19, day 11 today —
+window technically closed at day 7 but visit was scheduled at day 11; document
+attempt-to-meet for MIPS).
+
+Problem list (active): HFpEF (I50.32) — LVEF 55%, dx 2022, NYHA II; HTN (I10);
+T2DM (E11.9, A1c 6.7); paroxysmal AFib (I48.0) on apixaban; CKD stage 2 (eGFR 68);
+hyperlipidemia (E78.5); osteoarthritis bilat knees (M17.0); MDD recurrent in
+remission (F33.42) on escitalopram 10; mild cognitive impairment (G31.84) —
+flagged 2025-11 on MoCA 22/30.
+
+Recent discharge 2026-04-19 (5-day inpatient stay): admitted 4/14 from ED for
+acute on chronic HFpEF exacerbation triggered by NSAID self-treatment for knee
+pain; IV diuresis (furosemide 40 IV BID → 40 PO BID at discharge from prior
+20 PO daily); apixaban continued; counseled to discontinue NSAIDs; cardiology
+follow-up scheduled 5/14; discharge weight 168 lb (admission 173 lb, dry-weight
+target 167). Discharge BNP 412 (admit 1,840). Hospital pharmacist noted
+medication-recon discrepancy: home list had losartan 50 daily; discharge had
+both losartan 50 AND new lisinopril 10 (dual ACE/ARB — flagged but not yet
+resolved). CHF Readmission-Risk score (LACE+ adapted): 14 (HIGH).
+
+Meds (post-discharge, current):
+  furosemide 40 mg BID (UP from 20 daily) — diuretic, ISMP-monitoring
+  apixaban 5 mg BID — anticoagulant, ISMP-HIGH-ALERT
+  metoprolol succ 50 mg daily — beta-blocker
+  losartan 50 mg daily — ARB (home regimen)
+  lisinopril 10 mg daily — ACE-I (added at discharge — **dual ACE/ARB flag**)
+  atorvastatin 40 mg QHS
+  metformin 1000 mg BID
+  escitalopram 10 mg daily
+  acetaminophen 500 mg TID PRN knee pain (replacement for NSAID)
+  KCl 20 mEq daily (started for diuretic)
+  ASA 81 mg daily — held in chart 2024 due to apixaban; check if reordered
+
+Allergies: NKDA.
+
+Recent labs (discharge 2026-04-19):
+  BMP: Na 136, K 4.1, Cl 102, HCO3 25, BUN 24, Cr 1.0, eGFR 68, glu 142
+  Mg 1.9 (low-normal)
+  CBC: Hgb 11.8 (baseline 12.5), Plt 198
+  BNP 412 (admit 1,840 → discharge 412)
+  Trop neg ×2, INR 1.1
+  HbA1c 6.7 (last 3 mo); LDL 78; TSH 2.1
+  UACR 8 mg/g (normal)
+
+Outside records (cardiology 2026-03-12 — pre-admission): TTE LVEF 55%, mild
+LAE, no significant valvular disease, grade I diastolic dysfunction.
+
+Care gaps / preventive (from chart review):
+  - Mammogram (BCS-E): last 2024-01 — DUE in 2026
+  - Colorectal screening (COL-E): last colo 2018 — eligible to extend to 10-yr;
+    next due 2028 (already closed)
+  - DEXA: last 2022, T-score -1.4 (osteopenia)
+  - Cervical cancer screening: age out
+  - PCV20: NOT GIVEN; PPSV23 2020; PCV13 2019
+  - RSV vaccine: NOT GIVEN
+  - Shingrix series: incomplete (#1 given 2023-08, #2 never given)
+  - 2025-26 flu: GIVEN 2025-10-15
+  - Diabetic eye (CDC: EED): last 2024-06 — DUE
+  - HbA1c (CDC): at goal 6.7 — closed
+  - CDP (depression screening): last 2025-11 (PHQ-9 4); within 12 mo
+  - Statin therapy (DSF): on atorva 40 — closed
+  - Advance Care Planning (G0444 + ACP add-on): no chart record of ACP
+    conversation; pt has no documented advance directive or POLST
+  - Cognitive assessment: 2025-11 MoCA 22/30 (MCI) — re-evaluate per AWV
+    requirement; consider chart formal cognitive-impairment workup
+  - HRA: never completed (this is initial AWV)
+
+SDOH (PRAPARE 2026-02-10 — TIER 2 active):
+  - Lives alone, widowed 2024
+  - Housing: stable, owns home
+  - Food insecurity: positive (one Hunger Vital Sign hit — "ran out of food
+    once in past 30 days")
+  - Transportation: limited (does not drive; relies on niece, 2x/wk)
+  - Social isolation: positive (no daily contact most days; weekly church
+    pre-COVID, has not resumed)
+  - Income: SS only; reports moderate medication-cost burden ($120/mo OOP)
+  - Caregiver: niece, lives 22 mi away
+
+HCC-RAF (current claim year): 1.34 (prior year 1.18, delta +0.14 driven by
+new diagnoses HFpEF active + CKD2 + MCI). Open suspect from chart:
+proteinuria pattern would code N18.32 (CKD3a) if eGFR confirmed below 60
+on this visit's labs.
+
+PCP-noted concerns: pt mentioned at discharge call that she has been
+"forgetting things since the hospital"; family expressed concern about
+home safety alone post-discharge.
+```
+
+**Output (~120-second pre-visit summary):**
+```
+═══════════════════════════════════════════════════════════════════════
+PRE-VISIT SUMMARY — Ethel Washington, 71F · DOB last 4 /1955 · MRN /0824
+Visit:  2026-04-30 · **Initial Medicare AWV (G0438)** · 60 min slot
+        + serves as POST-DISCHARGE FOLLOW-UP (D/C 2026-04-19, day 11)
+Panel:  Traditional Medicare + Plan G  |  MIPS-reporting 2026
+        PCP: J. Park, MD               |  Risk: **CHF readmit LACE+ 14 (HIGH)**
+═══════════════════════════════════════════════════════════════════════
+
+PATIENT SNAPSHOT
+71F, widowed, lives alone, post-discharge day 11 from a 5-day HFpEF
+exacerbation triggered by NSAID self-treatment. **CHF readmission risk
+HIGH (LACE+ 14).** Active SDOH: food insecurity (+), social isolation (+),
+limited transportation. **MCI flagged 2025-11 (MoCA 22/30) and post-d/c
+family safety concern this week.** Has never had a Medicare AWV — today
+is initial G0438. HCC-RAF current 1.34 (prior 1.18, delta +0.14).
+
+ACTIVE PROBLEMS — STATUS
+- HFpEF (I50.32) NYHA II   — **POST-EXACERBATION, day 11.** Diuresis to
+                              168 lb (target 167). BNP 1840 → 412.
+                              **PRIORITY: weight check today, lung exam,
+                              orthostatics, JVP, edema. Confirm symptom
+                              status vs. baseline.**
+- AFib (I48.0)             — On apixaban 5 BID (ISMP-HIGH-ALERT). Last
+                              INR-equivalent monitoring per chart.
+                              **Verify pt taking BID, not QD.**
+- HTN (I10)                — **DUAL ACE/ARB ON DISCHARGE LIST**
+                              (lisinopril 10 + losartan 50). Hospital
+                              pharmacy flagged; **NOT YET RESOLVED.**
+                              **Decision today: confirm which agent
+                              continues; discontinue the other.**
+- T2DM (E11.9)             — A1c 6.7 at goal. Watch overshoot given
+                              new diuretic + reduced PO intake post-d/c.
+- CKD 2 → suspect 3a       — eGFR 68 at d/c. **HCC suspect:** if today's
+                              eGFR < 60, code N18.32 (CKD3a) and
+                              re-engage ACEi-vs-ARB decision in that
+                              context. Pull-today labs include BMP.
+- MCI (G31.84)             — 2025-11 MoCA 22/30. **NEW family concern
+                              about post-d/c forgetting.** Re-evaluate
+                              cognition per AWV requirement; consider
+                              formal workup referral.
+- MDD recurrent, remission — Escitalopram 10. PHQ-9 4 (Nov-2025, within
+                              12-mo). **Re-screen at AWV given recent
+                              hospitalization + widowhood + social
+                              isolation.**
+- Osteoarthritis knees     — **NSAID-RESTRICTED post-HFpEF.** APAP 500
+                              TID PRN replacement in place. **Reinforce
+                              today** (this was the precipitant).
+- Osteopenia (M85.80)      — 2022 DEXA T -1.4. Repeat DEXA due 2026
+                              (4-yr interval).
+
+MEDICATIONS — HIGH-LEVERAGE NOTES
+- furosemide 40 mg BID  — **DOUBLED from 20 daily at d/c.** Weight today
+  is the primary titration signal; ↓ to 40 daily if weight at dry target.
+  K 4.1 + Mg 1.9 at d/c; pt on KCl 20 mEq — **recheck K + Mg today.**
+- apixaban 5 mg BID  — **ISMP HIGH-ALERT.** Confirm dosing schedule with
+  patient. **No NSAID** reinforced.
+- losartan 50 + lisinopril 10  — **DUAL ACE/ARB FLAG (UNRESOLVED).**
+  Action: discontinue one today. Recommended: continue losartan (home
+  regimen), discontinue the new-at-d/c lisinopril, unless rationale on
+  d/c summary; document MD decision and reconciliation note.
+- metoprolol succ 50  — continue; pulse-check today.
+- ASA 81  — **HELD per 2024 chart note (on apixaban).** Confirm not
+  resumed unintentionally during admission; if on d/c list, hold.
+- KCl 20 mEq  — new for diuretic. Recheck K today.
+- escitalopram, metformin, atorva  — continue.
+- APAP 500 TID PRN  — knee pain; reinforce NSAID prohibition.
+
+RECENT RESULTS & TRENDS (most recent: 2026-04-19 d/c labs)
+| Lab     | Current | Trend         | Action today                |
+|---------|---------|---------------|-----------------------------|
+| Weight  | 168 lb  | ↓ from 173    | check today vs. dry 167     |
+| BNP     | 412     | ↓ from 1,840  | trend established           |
+| K       | 4.1     | low-normal    | **recheck (KCl + diuretic)**|
+| Mg      | 1.9     | low-normal    | **recheck**                 |
+| eGFR    | 68      | stable        | **recheck — suspect CKD3a** |
+| Hgb     | 11.8    | ↓ from 12.5   | monitor; not transfusion-eligible
+| BMP     | wnl     | —             | repeat today                |
+| HbA1c   | 6.7     | at goal       | next due 2026-Q3            |
+| INR     | 1.1     | not on warfarin| n/a                        |
+**Pull-today labs:** BMP + Mg (renal + electrolyte trend), weight.
+
+MIPS CARE GAPS & ACTION ITEMS (MIPS-relevant flagged ⭐)
+⭐ HbA1c poor control (CDC)   — 6.7, NOT in poor-control denom — closed
+⭐ BCS-E (mammogram)           — last 2024-01; **due now (2026)**
+⭐ COL-E (colorectal)          — colo 2018; closed thru 2028
+⭐ CDP (depression screen)     — PHQ-9 11/2025 score 4; closed thru 11/2026
+⭐ DSF (statin)                — on atorva 40; closed
+   Diabetic eye (CDC-EED)     — last 2024-06; **due — order today**
+   PCV20                       — **NOT GIVEN — give today** (eligible)
+   RSV vaccine                 — **NOT GIVEN — discuss today**
+   Shingrix #2                 — incomplete (#1 2023-08); **schedule**
+   DEXA                        — last 2022, due 2026; **order**
+**AWV-SPECIFIC ELEMENTS REQUIRED TODAY (G0438)**
+   HRA                         — patient has never completed; complete today
+   Cognitive screen            — MoCA 22/30 11/2025 + new family concern;
+                                 re-administer + consider formal workup
+                                 (rule out post-hospital delirium / vasc
+                                 / Alzheimer's pattern)
+   ACP (G0444 + add-on code)  — **pt has NO advance directive on file;**
+                                 PCP override fires: surface ACP at AWV.
+                                 Initiate today; offer to schedule a
+                                 dedicated ACP visit if not completed.
+   Functional / fall risk      — high-priority given post-d/c, MCI,
+                                 lives alone, social isolation, niece
+                                 2x/wk only — administer Timed Up and Go
+                                 + STEADI fall-risk screen
+   IPPE vs. AWV                — IPPE window passed (>12 mo from Med
+                                 enrollment); initial AWV (G0438) is
+                                 the correct code today, not G0402.
+   Chronic Care Management    — pt clearly eligible for CCM (G0506
+   eligibility (post-AWV)       initiating + 99490 monthly); enroll
+                                 today or schedule CCM consent visit.
+
+SDOH-DRIVEN ACTION (per PRAPARE 2026-02-10, TIER 2 active)
+- Food insecurity (+)         — refer to FQHC food pantry partnership;
+                                 SNAP screening; G0136 SDOH risk
+                                 assessment code eligible
+- Social isolation (+)        — connect to senior center / community
+                                 program; flag MA care-mgmt outreach
+- Transportation limited      — confirm transport for cardiology 5/14
+                                 visit; verify Medicare NEMT options
+- Caregiver capacity          — niece 22 mi away, 2x/wk; given post-d/c
+                                 + MCI + family concern, **escalate**:
+                                 home-health PT/OT eval, consider
+                                 assisted-living counseling, consider
+                                 medical-alert system
+
+OUTSTANDING / IN-FLIGHT
+- Dual ACE/ARB reconciliation — UNRESOLVED from d/c. **TODAY.**
+- Cardiology follow-up 5/14   — confirmed; transportation arranged?
+- Home-health post-d/c        — was this ordered at d/c? **VERIFY**
+
+PROVIDER-SPECIFIC EMPHASIS (per config.yml → provider_focus_overrides)
+- Always surface CHF readmit-risk score when present  →  done, LACE+ 14 above
+- Always surface advance-care-planning eligibility on AWV  →  surfaced, ACP today
+
+HCC-RAF / CODING OPPORTUNITIES (HCC-RAF delta surfacing enabled)
+- HCC suspect: confirm CKD3a (N18.32) if today's eGFR <60 — supported
+  by trended labs and proteinuria pattern
+- HCC 87 HFpEF active: actively managed today, code I50.32
+- HCC 18 DM with chronic complication: A1c at goal, but CKD comorbidity
+  active — confirm coding
+- HCC 60 MDD recurrent: in partial remission, currently on tx — confirm
+  coding context; do not code "in full remission" if symptoms returning
+  post-hospitalization
+- New HCC capture potential: if formal cognitive workup confirms a
+  named cognitive-impairment diagnosis (vs. MCI), recode at the next
+  encounter
+
+SUGGESTED VISIT AGENDA (in priority order, 60-min slot)
+1. **Acute HFpEF post-d/c assessment** — weight, lung exam, edema, JVP,
+   orthostatic vitals, symptom check; diuretic titration decision
+2. **Dual ACE/ARB reconciliation** — confirm one continues, one stops;
+   document decision and rationale; pharmacy follow-up
+3. **Recheck BMP + Mg today** — renal/electrolyte trend; confirm or
+   change CKD code based on eGFR
+4. **AWV core elements** — HRA, cognitive screen (MoCA + family concern
+   context), depression re-screen, functional / fall risk
+5. **ACP conversation initiation** — given AWV + post-d/c + MCI +
+   family concern, ACP is the single highest-leverage AWV component
+   today; bill G0444 + ACP add-on
+6. **Immunization sweep** — PCV20 today, RSV decision, Shingrix #2 schedule
+7. **CCM enrollment offer** — G0506 initiating visit today or schedule
+8. **SDOH-driven follow-up** — G0136 risk assessment, home-health
+   re-engagement, transportation for 5/14 cardiology, caregiver
+   capacity escalation
+
+[VERIFY: Was home-health PT/OT ordered at discharge — yes/no?]
+[VERIFY: ASA 81 — on d/c list or held? If on list, hold (apixaban)]
+[VERIFY: Last formal cognitive workup (CT/MRI brain, B12, TSH) — chart search]
+[VERIFY: Cardiology 5/14 — transportation arranged?]
+[VERIFY: HCC-RAF — is CKD3a (N18.32) currently submitted, or do we need
+  to confirm with today's labs and update problem list?]
+
+═══════════════════════════════════════════════════════════════════════
+Read time target: 120 sec (AWV-day override per config.yml)
+Generated 2026-04-30 06:50 from chart paste
+═══════════════════════════════════════════════════════════════════════
+```
+
+The second example illustrates how the skill behaves when the visit type is **higher-stakes** than the default 90-second chronic-care follow-up: it expands the time target to the panel's AWV-day override (120 sec), **layers the recent-discharge transition_of_care elements onto the AWV emphasis profile** (post-d/c weight + dual-ACE/ARB reconciliation are pulled forward and called out as ordered priorities, not background context), **surfaces the SDOH risk score** (PRAPARE tier 2 active) as a one-line snapshot tag and then expands into a dedicated SDOH-driven action block with G0136 eligibility, **surfaces the CHF readmission-risk score** (LACE+ 14) on the header line per the `provider_focus_overrides` hook, **demonstrates the AWV-specific elements** the appointment_type_emphasis profile requires (HRA, MoCA + family-concern context, ACP per the second override, functional / fall-risk per the STEADI overlay, IPPE-vs-AWV code disambiguation, CCM eligibility post-AWV), **uses the MIPS measure set** rather than the ACO REACH measure set so the care-gap layering shifts from CDC: EED-style ACO-attributed flags to MIPS-attributed flags, **surfaces HCC-RAF coding opportunities** when the `risk_stratification_inputs: { hcc_raf_delta: true }` hook fires (with a named open-suspect for CKD3a contingent on today's lab), and **flags five explicit `[VERIFY: ...]` items** rather than the three from Example 1 because higher-complexity discharge-stacked AWV visits surface more unresolved chart questions. The `panel_voice: "explanatory, family-medicine attending"` shows up in the more elaborated prose of the action notes vs. the clipped surgical-resident voice the first example would use if configured differently. Together the two examples now demonstrate four of the seven `appointment_type_emphasis` paths and two of the four `panel_quality_programs` configurations, plus both extremes of the `time_target` override and both kinds of `provider_focus_overrides` (single-trend-flag vs. AWV-specific element).
