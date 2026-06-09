@@ -4,8 +4,8 @@ category: operations
 tools: [claude, chatgpt]
 difficulty: intermediate
 time_saved: "~10 min/encounter"
-version: 1.0
-last_eval_score: null
+version: 1.1
+last_eval_score: 8.90
 ---
 
 # 🏠 SDOH Risk Assessment Summarizer
@@ -185,8 +185,54 @@ Coding Hand-Off
 - Z codes: Z59.41, Z59.12, Z59.82, Z59.86 — each supported by documented screen response
 - Value-based contract: counts toward plan SDOH-E Z-code capture measure for 2026
 
-Patient-Facing Summary (Spanish preferred — translate before sharing)
-[plain-language text per template]
+Patient-Facing Summary (English draft at ~6th-grade level; route the Spanish
+version through the practice's certified-translation workflow before sharing —
+do not ship the machine Spanish below in the AVS without that review)
+
+  ENGLISH
+  Today we talked about some things outside of medicine that can make it
+  harder to stay healthy. Here is what we heard and what we can do together.
+
+  What we heard:
+  - It is hard to afford enough food right now.
+  - Your power may be shut off soon — and your insulin needs to stay cold.
+  - Getting to your appointments has been hard.
+
+  What we will do:
+  - A meals program will call you to set up healthy food. (Ms. Alvarez,
+    by April 16)
+  - Our social worker will help you apply for help with your power bill,
+    today.
+  - A ride benefit will be set up for your visits. (Starts April 18)
+
+  What you can do if things change:
+  - If your power is turned off before we fix it, call us right away at
+    [office number] so we can protect your insulin.
+
+  ESPAÑOL (BORRADOR — requiere revisión de traducción certificada antes de
+  entregarse)
+  Hoy hablamos de algunas cosas fuera de la medicina que pueden dificultar
+  mantenerse sano. Esto es lo que escuchamos y lo que podemos hacer juntos.
+
+  Lo que escuchamos:
+  - Es difícil pagar suficiente comida ahora mismo.
+  - Es posible que le corten la luz pronto — y su insulina debe mantenerse fría.
+  - Llegar a sus citas ha sido difícil.
+
+  Lo que haremos:
+  - Un programa de comidas lo llamará para organizar comida saludable.
+    (Sra. Alvarez, antes del 16 de abril)
+  - Nuestra trabajadora social lo ayudará hoy a solicitar ayuda con su factura
+    de luz.
+  - Se le activará un beneficio de transporte para sus citas. (Comienza el
+    18 de abril)
+
+  Lo que puede hacer si algo cambia:
+  - Si le cortan la luz antes de que lo resolvamos, llámenos de inmediato al
+    [número de la oficina] para proteger su insulina.
+
+  [Note: utilities and IPV were not flagged [SENSITIVE CHANNEL] here; nothing
+  in this summary discloses a safety risk, so standard AVS delivery is fine.]
 
 Closed-Loop Referrals
 - Medically tailored meals (food) | CM J. Alvarez calls by 2026-04-16 | warm handoff

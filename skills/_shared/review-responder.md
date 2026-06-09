@@ -4,8 +4,8 @@ category: _shared
 tools: [claude, chatgpt]
 difficulty: beginner
 time_saved: "~10 min/review"
-version: 2.0
-last_eval_score: 4.3
+version: 2.1
+last_eval_score: 8.90
 ---
 
 # ⭐ Review Responder
@@ -131,4 +131,116 @@ HHS/OCR has issued multiple civil monetary penalties against practices and provi
 
 ## Example Output
 
-> [This section will be populated by the eval system with a reference example. For now, run the skill with sample input to see output quality.]
+Three worked examples cover the two highest-frequency categories (positive and negative-operational) plus the highest-stakes category (negative-clinical, which always routes to human review and carries a private-channel template). Each shows the public response, the platform/category fit, and the send recommendation. Practice identity is pulled from `config.yml` (here: *Cedar Park Family Medicine*, office-manager line, `voice: warm-professional`).
+
+### Example A — Negative, Operational (Google Business Profile, 2★)
+
+```
+INPUT
+  Platform:        Google Business Profile
+  Rating / text:   2★ — "Waited 50 minutes past my appointment time and the
+                   front desk never explained the delay. Staff were short with
+                   me when I asked. Won't be back."
+  Reviewer:        "J. Okafor" (public display name)
+  Category:        Negative — operational (wait time + front-desk tone)
+  Confirmable non-PHI facts: practice added a second Monday front-desk rep in March
+
+CATEGORY → response pattern (c): acknowledge the operational area, state a
+concrete factual improvement, offer a private path. No PHI; no confirmation
+of a patient relationship.
+
+──────────────────────────────────────────────────────────────────────
+DRAFT PUBLIC RESPONSE  (Google norms: 1–3 short paragraphs, public + indexed)
+──────────────────────────────────────────────────────────────────────
+Thank you for taking the time to share this. A long wait with no explanation
+isn't the experience our team wants anyone to have, and being made to feel
+rushed at the front desk is something we take seriously.
+
+We've recently added a second front-desk representative on our busiest days
+to keep wait times down and keep patients informed when the schedule slips.
+If you'd like to talk through what happened, our office manager would welcome
+the conversation directly — you can reach the office at (512) 555-0140.
+
+— The team at Cedar Park Family Medicine
+
+RECOMMENDATION:  ✅ Send now. Operational category, no clinical content, no named
+provider, reviewer identity is a generic display name. Meets HIPAA rules
+(no relationship confirmed, no PHI, no "our records show"). ~610 characters —
+within Google norms.
+```
+
+### Example B — Positive (Healthgrades, 5★)
+
+```
+INPUT
+  Platform:  Healthgrades
+  Rating:    5★ — "Best experience I've had with a doctor's office. Everyone
+             was kind and I never felt rushed."
+  Reviewer:  "Grateful patient"
+  Category:  Positive
+
+CATEGORY → response pattern (a): thank in general terms, reinforce a value,
+keep it short. Do NOT tie the thanks to a specific visit (that would confirm
+the relationship).
+
+──────────────────────────────────────────────────────────────────────
+DRAFT PUBLIC RESPONSE  (Healthgrades norms: shorter than Google, 2–3 sentences)
+──────────────────────────────────────────────────────────────────────
+Thank you for the kind words — they mean a great deal to our whole team.
+Treating people with respect and never making anyone feel rushed is exactly
+what we aim for every day. We're grateful you took a moment to share it.
+
+— The team at Cedar Park Family Medicine
+
+RECOMMENDATION:  ✅ Send now. General-terms thanks; no relationship confirmed,
+no PHI. 3 sentences — fits Healthgrades.
+```
+
+### Example C — Negative, Clinical (Yelp, 1★) — human review required
+
+```
+INPUT
+  Platform:  Yelp
+  Rating:    1★ — "Dr. Reyes misdiagnosed me and I ended up in the ER a week
+             later. Completely incompetent and dismissive of my symptoms."
+  Reviewer:  "Marcus T."
+  Category:  Negative — clinical (also names a provider)
+
+CATEGORY → response pattern (b): empathy without admitting fault or confirming
+the relationship; commitment to quality in general terms; private path; calm,
+non-defensive. Names a provider AND alleges a clinical event → MANDATORY human
+review before posting, AND route to Risk/Compliance because a possible
+patient-safety event (ER visit after an alleged missed diagnosis) is described.
+
+──────────────────────────────────────────────────────────────────────
+DRAFT PUBLIC RESPONSE  (do NOT defend the care; move specifics to private)
+──────────────────────────────────────────────────────────────────────
+We're sorry to hear about your experience — concerns like this matter to us,
+and we want to understand and address them. We can't discuss any specifics in
+a public forum, but our practice is committed to careful, attentive care for
+everyone who walks through our doors. Please reach our office manager directly
+at (512) 555-0140 so we can listen and help however we can.
+
+— The team at Cedar Park Family Medicine
+
+RECOMMENDATION:  ⚠️ DO NOT auto-post. Hold for human review (clinical-negative +
+named provider). Route to Risk/Compliance first: the review describes a
+possible patient-safety event. Compliance confirms the public wording before
+it posts; no emoji; no "our records," no visit reference, provider not
+acknowledged.
+
+──────────────────────────────────────────────────────────────────────
+OPTIONAL PRIVATE-CHANNEL MESSAGE  (if the platform supports DM, or for the
+office manager to use if the reviewer calls)
+──────────────────────────────────────────────────────────────────────
+"Thank you for reaching out. I'm the office manager at Cedar Park Family
+Medicine and I'd like to understand what happened and see how we can help.
+I'm not able to discuss any details over a public channel, but I'm available
+by phone at (512) 555-0140, Monday–Friday, 8:00 AM–5:00 PM. I'd genuinely
+welcome the chance to talk."
+
+LOGGED:  Response + escalation recorded in the reputation/compliance log per
+the practice's retention policy.
+```
+
+These examples illustrate the target: the response pattern is selected from the review category (§2 of Instructions); platform norms (§3) shape length and format; HIPAA rules (§1) are visibly honored — no relationship confirmation, no PHI, no "our records show," no public defense of clinical care; the send-now vs. hold-for-human-review decision is explicit and reasoned; clinical-negative and named-provider reviews trigger both human review and Risk/Compliance routing; and a private-channel template is supplied where private follow-up is appropriate.
