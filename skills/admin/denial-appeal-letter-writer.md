@@ -4,8 +4,8 @@ category: admin
 tools: [claude, chatgpt]
 difficulty: intermediate
 time_saved: "~30 min/letter"
-version: 1.3
-last_eval_score: 8.90
+version: 1.4
+last_eval_score: 9.00
 ---
 
 # 📨 Denial Appeal Letter Writer
@@ -35,6 +35,16 @@ Provide the following:
 4. **Service details** — What was ordered or performed (CPT/HCPCS codes, dates of service, provider)
 5. **Supporting evidence** (optional but recommended) — Relevant clinical guidelines (e.g., InterQual, Milliman, specialty society guidelines), peer-reviewed literature, or prior medical records that strengthen the case
 6. **Payer information** — Insurance company name, plan type, and appeal submission address or fax if known
+
+### Minimum viable input (fast path)
+
+You do **not** need all six items above to get a usable first draft. The skill is built to one-shot a complete, signature-ready letter from a minimal input set and self-flag the rest, rather than stalling on a clarification round-trip. Tiering:
+
+- **Tier 1 — must have (the skill drafts from these alone):** (a) the denial reason — paste the denial letter / EOB text verbatim, or quote the stated reason; (b) the service denied (procedure, drug, admission, or level-of-care change); (c) the core clinical justification in one or two sentences (diagnosis + why it was needed).
+- **Tier 2 — strongly improves the draft but is auto-flagged if absent:** claim/reference number, member ID, exact dates of service, CPT/HCPCS and ICD-10 codes, payer appeal address/fax, appeal deadline.
+- **Tier 3 — strengthens but never blocks:** named guideline citations, prior-treatment timeline, enclosure list.
+
+**Rule:** never bounce the request back asking for Tier 2/3 items when Tier 1 is present. Draft the full letter, insert a typed `[VERIFY: <missing item>]` token at each spot a Tier 2/3 value belongs (claim #, member ID, dates, codes, payer address, deadline), and collect every such token into a short **"Before you send — fill these in"** checklist at the very top of the output so the user can complete the letter in one editing pass. Pull any of these values automatically from `config.yml` (e.g., payer routing, signature block, enclosure-pack defaults) before flagging them as missing. Only ask a clarifying question when a **Tier 1** item is genuinely absent or the denial reason is internally contradictory — never for formatting, tone, or Tier 2/3 facts.
 
 ## Instructions
 
@@ -99,7 +109,7 @@ You are a skilled healthcare professional's AI assistant specializing in revenue
 **Process:**
 
 1. Review the denial reason carefully and identify the specific clinical or administrative basis for the denial
-2. Ask clarifying questions only if the denial reason is unclear or critical clinical evidence is missing. Make reasonable assumptions for formatting and style preferences
+2. Ask clarifying questions only if a **Tier 1** item (denial reason, denied service, or core clinical justification) is missing or the denial reason is internally contradictory. For any missing Tier 2/3 fact, draft anyway and insert a `[VERIFY: ...]` token plus a top-of-letter "Before you send — fill these in" checklist (see *Minimum viable input* above). Make reasonable assumptions for formatting and style preferences
 3. Structure the appeal letter with the following components:
 
    **a. Header & Identification**
@@ -145,6 +155,7 @@ You are a skilled healthcare professional's AI assistant specializing in revenue
 - Evidence-based arguments with specific guideline citations
 - Professional, persuasive tone appropriate for payer correspondence
 - Ready for provider review and signature with minimal editing
+- When any Tier 2/3 input was missing, lead the output with a brief **"Before you send — fill these in"** checklist enumerating every `[VERIFY: ...]` token in the letter, so the whole letter can be finished in one editing pass rather than a back-and-forth
 - Saved to `outputs/` if the user confirms
 
 ## Example Output

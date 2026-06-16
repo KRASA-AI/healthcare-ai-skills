@@ -4,8 +4,8 @@ category: admin
 tools: [claude, chatgpt]
 difficulty: intermediate
 time_saved: "~15 min/question"
-version: 2.2
-last_eval_score: 8.90
+version: 2.3
+last_eval_score: 9.10
 ---
 
 # ⚖️ Policy & Compliance Q&A
@@ -49,6 +49,16 @@ Provide the following:
 7. **Urgency** — Is this a "real-time, patient is in the room" question, an operational question with hours-to-days tolerance, or a design question that can wait for counsel? Urgency drives the depth of the answer and the escalation language.
 
 If a question requires facts the user did not supply (e.g., "what state?" for a scope-of-practice question, or "how many records were involved?" for a breach risk assessment), the skill returns an **"Information still needed"** list before drafting the answer — never invents jurisdictional facts.
+
+### Minimum viable input (fast path)
+
+Most of the seven items above are *context that sharpens* the answer, not gates that block it. To minimize back-and-forth, tier the inputs:
+
+- **Tier 1 — must have to answer at all:** (1) the actual question, stated specifically. That alone is enough to produce a **federal-default first-pass answer** in the full six-section format, with every state-, setting-, or payer-dependent paragraph marked `[VERIFY: ...]`.
+- **Tier 2 — materially changes the answer; pulled from `config.yml` first, then flagged if still missing:** jurisdiction, setting type, payer context. Pull these from `practice_jurisdictions`, `setting_types`, and `payer_mix` **before** asking the user. Only when a Tier-2 fact is *outcome-determinative* and is absent from both the question and config (e.g., a scope-of-practice question with no state anywhere) does the skill return a single targeted ask rather than a federal-default guess.
+- **Tier 3 — refines tone/escalation but never blocks:** who is asking, urgency, specific factual context. Default to a compliance-officer audience and operational urgency when unstated.
+
+**Rule:** never return the full **"Information still needed"** list for Tier 2/3 gaps when Tier 1 is present *and* `config_missing_behavior` is `flag_and_proceed` (the default). Ship the federal-default answer with `[VERIFY: ...]` flags and a one-line "supply state/setting/payer for a jurisdiction-specific answer" prompt, so the user gets an actionable first answer in one pass. Reserve the blocking **"Information still needed"** list for the two cases that genuinely demand it: (a) a missing *outcome-determinative* fact (state for scope-of-practice, record count for a breach risk assessment), or (b) `config_missing_behavior: block_and_ask` is set.
 
 ## Before you start (personalization from `config.yml`)
 
@@ -230,7 +240,15 @@ seeing tomorrow?"
    - No counsel escalation required for the underlying question.
 
 6. DISCLAIMER
-   [standard disclaimer per template]
+   Disclaimer. This response is an operational summary of current statute,
+   regulation, and publicly available guidance as of the response date. It is
+   not legal advice and does not create an attorney-client relationship.
+   Regulations change, state law varies, and the facts of your specific
+   situation may materially alter the analysis. The Privacy Officer, Compliance
+   Officer, or outside counsel must make the final determination before any
+   action with enforcement, licensure, reimbursement, or patient-safety
+   consequences. Retain this response with the related compliance record.
+   [+ house_disclaimer_addendum from config.yml, appended verbatim if present]
 ```
 
 ### Second Example — CMS Billing Sub-Process (Incident-To Supervision)
@@ -341,7 +359,15 @@ we bill this visit incident-to Medicare under Dr. Reyes's NPI?"
      Texas does not impose additional incident-to rules beyond 42 CFR §410.26.
 
 6. DISCLAIMER
-   [standard disclaimer per template]
+   Disclaimer. This response is an operational summary of current statute,
+   regulation, and publicly available guidance as of the response date. It is
+   not legal advice and does not create an attorney-client relationship.
+   Regulations change, state law varies, and the facts of your specific
+   situation may materially alter the analysis. The Privacy Officer, Compliance
+   Officer, or outside counsel must make the final determination before any
+   action with enforcement, licensure, reimbursement, or patient-safety
+   consequences. Retain this response with the related compliance record.
+   [+ house_disclaimer_addendum from config.yml, appended verbatim if present]
 ```
 
 ### What this second example demonstrates
