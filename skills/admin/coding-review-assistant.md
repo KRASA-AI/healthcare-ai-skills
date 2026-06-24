@@ -4,8 +4,8 @@ category: admin
 tools: [claude, chatgpt]
 difficulty: intermediate
 time_saved: "~10 min/encounter"
-version: 1.3
-last_eval_score: 8.90
+version: 1.4
+last_eval_score: 9.20
 ---
 
 # 🔍 Coding Review Assistant
@@ -97,6 +97,21 @@ Then reference `knowledge-base/terminology/` for correct clinical and billing te
 - Professional formatting appropriate for a coding audit workpaper
 - Ready for coder or provider review with minimal interpretation needed
 - Saved to `outputs/` if the user confirms
+
+**Required workpaper structure (render in this fixed section order):**
+
+Produce the review as a numbered audit workpaper with the following ten sections in this exact order, so the output is transcribable by a biller and comparable across encounters. Omit a section only when it is genuinely not applicable to the encounter, and when omitting, replace it with a single line stating "Not applicable — [reason]" rather than dropping the heading silently.
+
+1. **Header block** — encounter type and date, patient identifier (redacted per facility rule), provider name and specialty, visit type, payer, documents reviewed, and the codes submitted by the provider.
+2. **Code Accuracy** — each submitted ICD-10 / CPT / HCPCS code marked ✓ (supported), ✗ (not supported / wrong specificity), or ▲ (supported but under-coded), each with the documentation language that justifies the call.
+3. **Under-Coding Detection** — missed diagnoses (with the supporting note language) and a separately labeled **HCC capture missed** subblock naming the HCC, the RAF coefficient, the model version, and the `[VERIFY]` flag.
+4. **Missed Procedure / Service Codes** — separately reportable services with the modifier remedy and any tied **DOC QUERY** number.
+5. **E/M Level** — the MDM walk (problems / data / risk) or the time-based path, ending in an explicit level recommendation with rationale.
+6. **Over-Coding & Compliance Risks** — NCCI / CCI edits, unbundling, modifier-clearance requirements, and audit-risk flags.
+7. **Documentation Improvement — Queries to Send** — each provider query written in send-ready CDI-query language and numbered (DOC QUERY 1, 2, …), formatted per `query_routing`.
+8. **Recommended Claim** — the final ICD-10 set and the final CPT/HCPCS set with modifiers, each changed/added line marked (← was X / ← new), in a block a biller can transcribe directly.
+9. **Risk-Adjustment Impact** — the RAF delta computed transparently with the model citation and the recapture condition, plus the estimated revenue impact where a baseline is available.
+10. **Summary for the Provider** — a short plain-language recap in the facility `voice`, counting the changes, additions, modifier corrections, and pending queries, followed by the consolidated `[VERIFY: ...]` flag list.
 
 ## Example Output
 

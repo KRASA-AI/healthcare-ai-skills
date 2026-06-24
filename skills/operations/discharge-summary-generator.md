@@ -4,8 +4,8 @@ category: operations
 tools: [claude, chatgpt]
 difficulty: beginner
 time_saved: "~20 min/summary"
-version: 1.3
-last_eval_score: 9.0
+version: 1.4
+last_eval_score: 9.20
 ---
 
 # 🏥 Discharge Summary Generator
@@ -53,6 +53,8 @@ Load `config.yml` from the repo root and reference `knowledge-base/terminology/`
 - **`config.yml` → `readmission_risk_flagging`** — practice-set rules for what triggers a readmission-risk callout in the safety-flags block (default trigger set if absent: 4-pt weight gain in 1 week on a HF patient; combined ACEi + MRA without 1-week BMP scheduled; eGFR < 30 with new nephrotoxic medication; polypharmacy ≥ 10 active medications; LACE+ score ≥ 11; HOSPITAL score in the high-risk band; ≥ 2 prior 30-day readmissions). When a trigger fires, the drafter surfaces it in the medication-reconciliation safety-flag block and the follow-up plan.
 - **`config.yml` → `confidentiality_overlays`** — `part_2_applicable` flag (when the discharging unit treats SUD), state confidentiality overlays (mental health, HIV, genetic, minor-consent, reproductive-health), and any state-specific behavioral-health-disclosure-on-discharge restriction. When overlay flags are present, the drafter routes the relevant content (SUD treatment details, behavioral-health diagnoses, genetic-test results) through a separately-segregated section labeled per overlay rather than the standard discharge body, and surfaces a `[VERIFY: 42 CFR Part 2 / state-overlay disclosure authorization]` flag.
 - **`config.yml` → `patient_facing_avs_flag`** — whether the skill should also produce a patient-facing After-Visit Summary alongside the clinical discharge summary (`true` (default for primary-care-aligned facilities), `false`, or `optional_on_request`). When `true`, the AVS uses 6th–8th grade reading level, the same red-flag list re-rendered in plain language, and a teach-back-confirmation checkbox.
+- **`config.yml` → `goals_of_care_capture`** — whether the summary documents the patient's goals of care and treatment preferences as part of the transition record (`required` (default), `optional`, or `omit`). CMS Discharge Planning Conditions of Participation (42 CFR 482.43, as revised by the 2019 IMPACT-Act discharge-planning final rule) require the discharge plan to reflect the patient's goals of care and treatment preferences, and require that the patient/caregiver be informed and involved in the plan. When `required`, the drafter adds a short **Goals of Care & Treatment Preferences** line to the Discharge Condition & Disposition section (code status, advance-directive/POLST status if provided, stated preferences such as "prefers to avoid rehospitalization / wishes to remain at home," and any documented surrogate decision-maker), drawing only from supplied input and flagging `[VERIFY: goals of care / advance-directive status]` when the input is silent rather than inventing a preference. For psychiatric / behavioral-health settings, this captures the patient's stated recovery goals and any psychiatric advance directive.
+- **`config.yml` → `completion_timeliness_rule`** — the facility's discharge-documentation timing expectation and the split between the brief transition handoff and the full dictated summary (`transition_note_then_full_summary` (default), `single_full_summary`, or facility override). Joint Commission requires the discharge summary in the record (commonly within 30 days), but safe transitions require a same-day/within-24-hour handoff to the next setting; when `transition_note_then_full_summary` is set, the drafter labels the output as either the **Transition Handoff** (medications reconciled, pending items, follow-up, red flags, responsible parties — the fields the receiving clinician needs before the full summary is dictated) or the **Full Discharge Summary**, per the `output_intent` the user supplies, and notes the completion deadline. If `output_intent` is unsupplied, it produces the full summary and flags `[VERIFY: transition handoff sent to next setting within facility timeliness window]`.
 - **`config.yml` → `output_destination`** — `outputs/discharge-summaries/` (default), `clipboard`, or `ehr_template_format`.
 - **`config.yml` → `config_missing_behavior`** — `flag_and_proceed` (default — produce a complete summary with `[VERIFY: ...]` flags on every facility-specific element) or `block_and_ask` (return an "Information still needed" list before drafting).
 
@@ -91,6 +93,7 @@ When `config.yml` is absent entirely, the drafter produces a complete acute-hosp
    - Patient's condition at discharge (stable, improved, etc.)
    - Disposition (home, SNF, home health, etc.)
    - Activity restrictions, diet, wound care, or device instructions
+   - Goals of care & treatment preferences (per `goals_of_care_capture`): code status, advance-directive / POLST status, stated preferences (e.g., avoid rehospitalization, remain at home), and any documented surrogate decision-maker — drawn only from supplied input, with `[VERIFY: goals of care / advance-directive status]` when the input is silent. Required under the CMS discharge-planning CoP (42 CFR 482.43)
 
    **g. Follow-Up Plan**
    - Scheduled appointments with dates and providers
@@ -109,6 +112,8 @@ When `config.yml` is absent entirely, the drafter produces a complete acute-hosp
 - Correct ICD-10 codes where identifiable from the clinical details
 - Clearly delineated sections with headers for easy scanning
 - Medication reconciliation table with clear change indicators
+- Goals of care & treatment preferences captured in the disposition section per `goals_of_care_capture` (CMS 42 CFR 482.43), or flagged `[VERIFY: ...]` when input is silent
+- Labeled as **Transition Handoff** or **Full Discharge Summary** per `completion_timeliness_rule` / `output_intent`, with the completion deadline noted
 - Ready for provider review and signature with minimal editing
 - Saved to `outputs/` if the user confirms
 

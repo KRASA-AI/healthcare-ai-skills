@@ -4,8 +4,8 @@ category: operations
 tools: [claude, chatgpt]
 difficulty: intermediate
 time_saved: "~15 min/note"
-version: 2.3
-last_eval_score: 8.4
+version: 2.4
+last_eval_score: 9.20
 ---
 
 # 🩺 Clinical Note Drafter
@@ -54,6 +54,7 @@ Load `config.yml` from the repo root and reference `knowledge-base/terminology/`
 - **`config.yml` → `icd10_strictness`** — `confident_only` (default — include ICD-10 codes only where the documentation confidently supports them; never guess), `confident_with_verify` (include codes plus a `[VERIFY: code]` flag for borderline calls), or `assessment_text_only` (do not surface ICD-10 codes; coder owns code assignment).
 - **`config.yml` → `safety_critical_clarification_rules`** — list of categories that DO trigger a clarifying question rather than a `[VERIFY]` flag (medication doses where mishearing creates harm risk, allergies, code status, NPO status, isolation precautions). Default trigger set if absent: any inferred medication dose, any allergy, any code-status statement, any NPO statement, any isolation statement.
 - **`config.yml` → `verify_flag_threshold`** — `liberal` (default — flag every uncertain element), `moderate` (flag only clinical-decision-relevant uncertainty), `conservative` (flag only safety-critical uncertainty). Most facilities prefer `liberal` so the signing provider sees every gap.
+- **`config.yml` → `documentation_integrity_rules`** — facility discipline against the two highest-scrutiny note-integrity failures (OIG, RAC/UPIC, and commercial-payer cloned-note audits target both). (1) **Copy-forward / cloned documentation:** the drafter only documents what the current encounter's input supports; it never carries forward exam findings, ROS, or HPI detail that the dictation does not contain, and where prior-note content is supplied as context it surfaces `[VERIFY: confirm carried-forward — not re-examined this encounter]` rather than restating it as today's finding. This is the documentation-side counterpart to the "do not invent findings" rule and the single biggest driver of note-bloat denials and false-claim exposure. (2) **AI-authorship attestation:** when `ai_authorship_disclosure` is set (`required`, `optional`, or `none`; default `required` where the facility policy or state law mandates disclosure of AI-assisted documentation), the drafter appends a facility-keyed line to the attestation block (e.g., "Draft generated with AI documentation assistance; reviewed, edited, and verified by the attesting provider, who attests to its accuracy") rather than presenting the note as unassisted. If the facility policy is unset, flag `[VERIFY: AI-assisted-documentation disclosure policy]` rather than asserting or omitting silently. The provider's personal-review-and-attestation requirement is never satisfied by the AI draft alone.
 - **`config.yml` → `output_destination`** — `outputs/clinical-notes/` (default) for staged notes pending provider review, `clipboard` if the facility pastes into the EHR rather than saving to disk, or `ehr_template_format` if the facility wants the note structured as an EHR-importable template.
 - **`config.yml` → `config_missing_behavior`** — `flag_and_proceed` (default — produce a complete note with `[VERIFY: ...]` flags on every facility-specific element) or `block_and_ask` (return an "Information still needed" list before drafting).
 
@@ -129,6 +130,7 @@ When `config.yml` is absent entirely, the drafter produces a generalist SOAP not
    - Use standard clinical abbreviations (HTN, DM2, CKD, COPD, etc.) per facility norms
    - Distinguish between patient-reported symptoms (subjective) and clinician-observed findings (objective) — never mix these
    - Do not invent or infer clinical findings not present in the source material. Use `[VERIFY: ...]` for anything uncertain
+   - Do not copy forward or clone prior-encounter findings as if re-examined today; per `documentation_integrity_rules`, carried-forward content is either omitted or flagged `[VERIFY: confirm carried-forward — not re-examined this encounter]`, never silently restated as a current finding
    - Include time-based documentation elements if relevant to E/M coding (counseling time, coordination time, total face-to-face time)
    - Ensure assessment complexity matches the documentation depth for E/M level support
 
@@ -139,7 +141,8 @@ When `config.yml` is absent entirely, the drafter produces a generalist SOAP not
 - Correct clinical terminology with facility-approved abbreviations
 - ICD-10 codes included in the assessment where identifiable
 - `[VERIFY: ...]` flags for any clinical details that need provider confirmation
-- Attestation/signature block at the end
+- No copy-forward / cloned findings restated as current; carried-forward content omitted or flagged per `documentation_integrity_rules`
+- Attestation/signature block at the end, including the AI-assisted-documentation disclosure line where `ai_authorship_disclosure` requires it (or a `[VERIFY: AI-assisted-documentation disclosure policy]` flag if the policy is unset)
 - Documentation sufficient to support the stated or implied E/M level
 - Ready for provider review with minimal editing
 - Saved to `outputs/` if the user confirms
