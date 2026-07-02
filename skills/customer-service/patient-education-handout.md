@@ -4,8 +4,8 @@ category: customer-service
 tools: [claude, chatgpt]
 difficulty: intermediate
 time_saved: "~20 min/handout"
-version: 2.2
-last_eval_score: null
+version: 2.3
+last_eval_score: 9.20
 ---
 
 # 📄 Patient Education Handout
@@ -53,6 +53,7 @@ Read these named hooks once. If a hook is absent, fall back to the default and s
 
 - `practice_specialty` — drives default topic library and tone (primary_care default; pediatrics; OB/GYN; cardiology; oncology; behavioral_health; endocrinology; orthopedics; dermatology; ED-discharge). Specialty seeds the default topic templates (e.g., asthma action plan + spacer technique for pediatrics; OB postpartum warning signs + lactation block for OB; chemo cycle + neutropenic-precaution block for oncology; SI-screening + 988 framing for behavioral health).
 - `reading_level_default` — `grade_6_8` (default per CMS / AHRQ / Joint Commission), `grade_5` for documented low-literacy populations, `grade_3_4` (caregiver-of-pediatric simplified). Apply Flesch-Kincaid check before delivery; replace Latinate words with shorter Anglo-Saxon equivalents.
+- `numeracy_rules` — health *numeracy* is a distinct competency from reading level, and is the dimension patient materials most often fail even when the prose scores well. Apply these rules to every number in the handout: (a) use **absolute risk with a consistent natural-frequency denominator** ("about 3 out of 100 people" — keep the same denominator throughout a handout), not relative risk ("cuts your risk in half") and not bare percentages for low-numeracy audiences; (b) **never present relative risk alone** — it systematically inflates perceived benefit; (c) use **whole numbers**, avoid decimals and avoid fractions like ½ (write "1 out of 4," not "25%" or "0.25"); (d) give a **plain anchor for clinical numbers** so a value is interpretable ("Your A1c is 8. We want it under 7." / "A good home blood pressure is under 130 over 80"); (e) keep **dose math concrete and pre-computed** ("take 2 pills," "give 5 mL using the marked syringe" — never make the patient compute mg/kg); (f) put time in everyday terms ("every morning," "for 5 days") rather than "BID" or "q12h." Default to these rules even when `numeracy_rules` is absent from config.
 - `language_preferences_supported` — keyed list of languages the practice has certified-translation coverage for (e.g., `en`, `es`, `vi`, `zh-Hans`, `ar`, `ru`, `ht`, `tl`). For supported languages, produce the handout at the same reading level. For unsupported languages OR for high-stakes content (oncology, informed consent, complex surgical prep), produce English with translation-ready formatting and route through `certified_translation_workflow` rather than shipping a machine translation.
 - `clinician_signature_block` — keyed per signing clinician role (attending physician, NP, PA, RN-led education visit, MA-prepared handout that requires clinician sign-off) with name, credentials, NPI where applicable, and the practice's exact "Reviewed by" line wording.
 - `practice_contact_block` — main phone, after-hours line or policy, patient-portal name + URL, secure-message instructions, address. Used in §8 (Your Team and Next Steps). Never invent.
@@ -151,6 +152,7 @@ Teach-back is AHRQ-recommended universal-precautions practice; every handout inc
 
 - **Reading level:** 6th–8th grade by default. Verify with a Flesch-Kincaid check before delivery. Replace long or Latinate words with shorter Anglo-Saxon equivalents ("doctor" not "physician," "use" not "utilize," "help" not "facilitate," "long-lasting" not "chronic" with the clinical term parenthetically the first time).
 - **Sentence length:** Target ≤ 15 words. Break up anything longer.
+- **Numeracy (distinct from reading level):** Numbers are audited separately from prose. Use absolute risk with one consistent natural-frequency denominator ("3 out of 100"), never relative risk alone; use whole numbers, not decimals or percentages, for low-numeracy audiences; give every clinical number a plain interpretive anchor ("Your A1c is 8 — we want it under 7"); pre-compute all dose math so the patient never multiplies or divides; express timing in everyday words, not Latin abbreviations. See the `numeracy_rules` config hook above. A handout that passes Flesch-Kincaid but presents risk as "lowers your risk by 40%" or dosing as "1 mg/kg" has failed the numeracy check.
 - **Structure:** Clear headings, short paragraphs (≤ 4 lines), bullets over prose for instructions, bold for action items, numbered lists for sequences.
 - **Visuals (optional):** Suggest where a simple icon or diagram would help (e.g., inhaler-with-spacer technique, AAA screening anatomy). Do not generate images; name the visual the handout should include.
 - **Font guidance for print:** ≥ 12 pt body, ≥ 14 pt headings, sans-serif, adequate white space, high contrast. This is an output-formatting hint, not a body-copy element.

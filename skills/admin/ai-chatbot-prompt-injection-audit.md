@@ -5,7 +5,7 @@ tools: [claude, chatgpt]
 difficulty: advanced
 time_saved: "~25 min/audit"
 version: 1.0
-last_eval_score: null
+last_eval_score: 9.10
 ---
 
 # 🛡️ AI Health Chatbot Prompt-Injection Pre-Deployment Audit

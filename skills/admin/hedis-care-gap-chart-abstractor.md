@@ -5,7 +5,7 @@ tools: [claude, chatgpt]
 difficulty: intermediate
 time_saved: "~20 min/chart"
 version: 1.1
-last_eval_score: 9.2
+last_eval_score: 9.40
 ---
 
 # 📊 HEDIS Care Gap & Chart Abstraction Assistant

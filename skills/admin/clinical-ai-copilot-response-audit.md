@@ -5,7 +5,7 @@ tools: [claude, chatgpt]
 difficulty: advanced
 time_saved: "~18 min/audit"
 version: 1.1
-last_eval_score: null
+last_eval_score: 9.20
 ---
 
 # 🩺 Clinical AI Copilot Response Audit

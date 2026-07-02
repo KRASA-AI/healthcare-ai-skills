@@ -5,7 +5,7 @@ tools: [claude, chatgpt]
 difficulty: intermediate
 time_saved: "~25 min/letter"
 version: 2.4
-last_eval_score: 8.90
+last_eval_score: 9.10
 ---
 
 # 📋 Prior Auth Letter Generator

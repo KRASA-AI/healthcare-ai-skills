@@ -5,7 +5,7 @@ tools: [claude, chatgpt]
 difficulty: advanced
 time_saved: "~30 min/submission"
 version: 1.0
-last_eval_score: null
+last_eval_score: 9.10
 ---
 
 # 🧾 WISeR Medicare Prior Auth Prep

@@ -4,8 +4,8 @@ category: operations
 tools: [claude, chatgpt]
 difficulty: beginner
 time_saved: "~10 min/referral"
-version: 2.4
-last_eval_score: 8.3
+version: 2.5
+last_eval_score: 9.20
 ---
 
 # ✉️ Referral Summary Writer
@@ -59,6 +59,7 @@ Read these named hooks once. If a hook is absent, fall back to the default and s
 - `state_privacy_overlays` — TX HB 300, CA CMIA, NY SHIELD, IL BIPA, WA My Health My Data Act, CO HB24-1054, plus 42 CFR Part 2 (substance use), state mental-health, HIV, genetic, minor-consent, and reproductive-health overlays. Apply the strictest applicable; segregate Part 2 / state-overlay-protected content into a separate consent-required attachment rather than inline.
 - `language_preference_routing` — patient's preferred language. If unsupported, produce English with translation-ready formatting and route through the certified-translation workflow rather than shipping a machine translation in the referral letter or accompanying patient-facing summary.
 - `accompanying_records_default` — `attach_summary + ECG + relevant labs + recent imaging` keyed per specialty (e.g., always send the most recent A1c and renal panel with endocrinology referrals; always send the relevant imaging report and the actual study link with surgical referrals; always send the validated PHQ-9 / GAD-7 / C-SSRS with behavioral-health referrals). Skill names the records and flags `[VERIFY: records attached]`.
+- `referral_scope_defaults` — the practice's default scope-of-referral designation per category, i.e., what the receiving specialist is actually being asked to do. Every referral must state exactly one: **evaluation / opinion only** (specialist evaluates and reports back; referring provider retains management), **evaluate and treat** (specialist may initiate treatment within the referral question), **co-management** (shared care with an explicit division of responsibilities — e.g., "you manage anticoagulation titration, we manage primary care and renal monitoring"), or **transfer of care** (specialist assumes ongoing management of the condition). This is not cosmetic: it is the difference between a *consultation* and a *transfer of care*, it governs whether the receiving provider can bill a consultation, and it is the single most common cause of referral-loop breakdown and patient bounce-back when left implicit. Default to `evaluation / opinion only` for primary-care-to-specialist referrals unless the input says otherwise; default to `co-management` for chronic-disease specialty referrals (e.g., nephrology for CKD, endocrinology for complex diabetes) where that is the practice norm. When scope is genuinely ambiguous in the input, state the assumed scope explicitly in the letter and flag `[VERIFY: referral scope — opinion-only vs evaluate-and-treat vs co-management vs transfer of care]` rather than leaving it unstated.
 - `closing_loop_protocol` — practice's loop-closure expectation (e.g., "consult note expected back via secure EHR within 7 days; if not received, care-coordinator follows up with receiving practice"). Inserted into the closing block.
 - `output_destination` — `outputs/`, `chart_attachment`, `secure_ehr_routing`, `fax_cover_packet`, `patient_portal_copy_to_patient`, or `multi_artifact` (clinical letter + plain-language patient summary at 6th–8th grade).
 - `config_missing_behavior` — `flag_and_proceed` (default — ship a complete letter with `[VERIFY: ...]` flags on every facility-specific element) vs. `block_and_ask`.
@@ -79,6 +80,7 @@ When `config.yml` is absent entirely, produce a generalist primary-care-to-speci
    **b. Opening**
    - Brief introduction identifying the referring provider and their relationship to the patient
    - Clear statement of the referral reason and what is being requested (evaluation, co-management, surgical opinion, procedure, etc.)
+   - **Explicit scope-of-referral designation** — state exactly one: *evaluation / opinion only* (please evaluate and report back; we retain management), *evaluate and treat*, *co-management* (with an explicit division of responsibilities), or *transfer of care* (per `referral_scope_defaults`). This is the consultation "three Rs" in practice — **Request** (a specific opinion or action is being asked for), to be matched by the specialist's **Render** and **Report** — and it determines whether the encounter is a consultation versus a transfer of care, who owns ongoing management, and whether the patient bounces back for a separate authorization. Never leave scope implicit.
    - Urgency level if non-routine
 
    **c. Clinical Summary**
@@ -112,6 +114,7 @@ When `config.yml` is absent entirely, produce a generalist primary-care-to-speci
 - Clinically focused on the referral question, not a full medical history
 - ICD-10 codes included for the referral diagnosis
 - Specific consultation questions included (generated if not provided)
+- Explicit scope-of-referral designation present (opinion-only / evaluate-and-treat / co-management / transfer of care), with the report-back expectation in the closing tied to that scope
 - Ready for provider review and signature with minimal editing
 - Saved to `outputs/` if the user confirms
 

@@ -5,7 +5,7 @@ tools: [claude, chatgpt]
 difficulty: intermediate
 time_saved: "~10 min/encounter"
 version: 1.1
-last_eval_score: 8.90
+last_eval_score: 9.10
 ---
 
 # 🏠 SDOH Risk Assessment Summarizer

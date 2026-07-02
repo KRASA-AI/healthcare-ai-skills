@@ -5,7 +5,7 @@ tools: [claude, chatgpt]
 difficulty: intermediate
 time_saved: "~15 min/question"
 version: 2.3
-last_eval_score: 9.10
+last_eval_score: 9.20
 ---
 
 # ⚖️ Policy & Compliance Q&A

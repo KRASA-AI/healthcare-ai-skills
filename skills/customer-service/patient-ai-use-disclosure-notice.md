@@ -4,21 +4,22 @@ category: customer-service
 tools: [claude, chatgpt]
 difficulty: intermediate
 time_saved: "~25 min/notice"
-version: 1.0
-last_eval_score: null
+version: 1.1
+last_eval_score: 9.20
 ---
 
 # 🪪 Patient AI-Use Disclosure Notice
 
 ## Purpose
 
-Draft a plain-language patient-facing disclosure that names *which* AI systems the practice uses in the patient's care, *when* and *how* the patient will encounter them, *what the patient can opt out of*, and *who to contact* with questions or to revoke consent. The output is calibrated to the wave of 2025–2026 state laws that now require this disclosure — Texas TRAIGA (HB 149, effective 1/1/2026), California AB 489 (effective 1/1/2026), Colorado HB26-1139, the Utah AI prior-authorization disclosure law (enacted 3/19/2026, effective 1/1/2027), and the broader 40+ state-AI-in-healthcare bills tracked across 25 states in 2026 — and to the 2026 federal direction set by the HHS AI Strategic Plan, the FDA January 2026 CDS guidance, and the CMS Interoperability and Prior Authorization Final Rule (CMS-0057-F) reasoning-disclosure expectations. The notice is patient-readable (6th–8th grade), bias-aware, and purpose-bound: it discloses what the law requires *and what a reasonable patient would want to know*, without legal hedging that obscures the answer.
+Draft a plain-language patient-facing disclosure that names *which* AI systems the practice uses in the patient's care, *when* and *how* the patient will encounter them, *what the patient can opt out of*, and *who to contact* with questions or to revoke consent. The output is calibrated to the wave of 2025–2026 state laws that now require this disclosure — Texas TRAIGA (HB 149, effective 1/1/2026), California AB 489 (effective 1/1/2026), Colorado HB26-1139, the Utah AI prior-authorization disclosure law (enacted 3/19/2026, effective 1/1/2027), Rhode Island's Use of AI by Healthcare Providers Notification Act (H 7538, signed 6/22/2026, which requires per-encounter patient notification whenever AI is used to document an in-person or telehealth visit, plus a clinician post-visit accuracy review of the AI-generated note), and the broader 40+ state-AI-in-healthcare bills tracked across 25 states in 2026 — and to the 2026 federal direction set by the HHS AI Strategic Plan, the FDA January 2026 CDS guidance, and the CMS Interoperability and Prior Authorization Final Rule (CMS-0057-F) reasoning-disclosure expectations. The notice is patient-readable (6th–8th grade), bias-aware, and purpose-bound: it discloses what the law requires *and what a reasonable patient would want to know*, without legal hedging that obscures the answer.
 
 ## When to Use
 
 Use this skill any time the practice needs a *patient-facing* disclosure of AI use — a written notice, a portal banner, a check-in iPad screen, a consent-form addendum, an after-visit-summary insert, a multilingual handout, or a script for the front desk to read. Common scenarios:
 
-- A practice in **Texas, California, Colorado, Utah, or any state with an effective 2026 AI-in-healthcare disclosure law** is operationalizing patient notification for the first time
+- A practice in **Texas, California, Colorado, Utah, Rhode Island, or any state with an effective 2026 AI-in-healthcare disclosure law** is operationalizing patient notification for the first time
+- A practice in **Rhode Island** has deployed an ambient AI scribe and must, under H 7538 (signed 6/22/2026), notify the patient that AI is used to document the visit *and* document that the clinician reviewed the AI-generated note for accuracy after the visit — both are statutory obligations, and the notification piece is exactly what this skill produces
 - A practice has rolled out an **ambient AI scribe** (Abridge, Suki, Nuance/Microsoft DAX, Ambience, Augmedix, Heidi, etc.) and needs to disclose to the patient that the encounter is being captured and drafted by AI before the visit begins
 - A practice has rolled out an **AI patient-portal message triage or draft-reply tool** (Epic AI for Patients, Johns Hopkins OPTIC, MyChart AI replies, healow Genie, Lindy) and the patient is interacting with AI-drafted text without realizing it
 - A practice has rolled out an **AI patient-facing chatbot** (PatientGPT, Emmie, K Health, Amazon One Medical AI assistant, hospital-branded AI front door) and needs a *first-screen* disclosure that the patient is talking to AI, not a human, plus a clear handoff path to a human
@@ -67,6 +68,7 @@ For the named jurisdiction, state in one block what the law explicitly requires.
 - **California AB 489** — Prohibition on AI developers and deployers from using terms, letters, phrases, or design elements that imply the AI possesses a healthcare license. Patient-facing AI must not be presented as a licensed clinician.
 - **Colorado HB26-1139** — A regulated healthcare professional must disclose to the patient the *purposes* for which the professional uses AI systems or AI-enabled diagnostic/therapeutic devices in the patient's care, and *when* those systems or devices are used.
 - **Utah (enacted 3/19/2026, effective 1/1/2027)** — Health insurers must publicly disclose AI use in authorization-request review and notify the Utah Department of Insurance, providers, and enrollees that AI is used to review authorization requests. (Patient-facing notice is the enrollee-disclosure piece.)
+- **Rhode Island H 7538 (signed 6/22/2026)** — A provider or facility that uses AI to document an in-person or telehealth visit must notify the patient that AI is used for that purpose, and must review the AI-generated documentation for accuracy after the visit. The provider definition is broad (physicians, PAs, dentists, RNs/LPNs, APRNs, nursing assistants, and other state-licensed professionals). For this skill, that means a per-encounter ambient-scribe notification is legally required in Rhode Island, not optional; note in the disclosure that a clinician reviews the AI-drafted note for accuracy after the visit (do not promise the patient a copy of the pre-review draft unless the practice actually retains and shares it). Rhode Island also enacted, the same day, a therapy-bot ban (H 7349 / S 2197) and a chatbot self-harm-safety Act (S 2195 / H 7350) — relevant if the practice also runs a patient-facing behavioral-health chatbot; cross-reference `behavioral-health-ai-chatbot-compliance-review.md`.
 - **Other states** — Default to the strictest applicable rule and add a `[VERIFY: state-specific requirement]` flag.
 
 If the user did not name a jurisdiction, ask before drafting. Do not assume federal preemption — there is none on this topic in 2026.
@@ -231,3 +233,7 @@ A good Patient AI-Use Disclosure Notice:
 - Returns `[REVIEW: Privacy Officer]` and `[REVIEW: counsel]` flags before the notice is published
 
 A bad notice over-promises (zero data retention, "fully HIPAA-secure," "never makes a mistake"), uses legal jargon, hides AI use behind the word "tools," lists opt-outs the practice cannot honor, or implies the AI is a clinician.
+
+## Version History
+
+- **v1.1 (2026-06-29):** Added Rhode Island H 7538 (Use of AI by Healthcare Providers Notification Act, signed June 22, 2026) to the jurisdictional perimeter — Purpose, When-to-Use, and the Section 1 "Confirm Required Disclosures" block. H 7538 makes per-encounter patient notification of AI documentation use a statutory obligation (paired with a clinician post-visit accuracy-review duty handled by `ambient-scribe-note-audit.md` v1.5). Noted the companion Rhode Island therapy-bot ban and chatbot-safety Act for practices running patient-facing behavioral-health chatbots. Strictly additive; no existing jurisdictional content, anti-pattern guardrail, or worked example was removed or weakened.

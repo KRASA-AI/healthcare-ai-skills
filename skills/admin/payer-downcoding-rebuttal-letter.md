@@ -5,7 +5,7 @@ tools: [claude, chatgpt]
 difficulty: advanced
 time_saved: "~35 min/letter"
 version: 1.0
-last_eval_score: null
+last_eval_score: 9.10
 ---
 
 # 📉 Payer Downcoding Rebuttal Letter
