@@ -4,7 +4,7 @@ category: customer-service
 tools: [claude, chatgpt]
 difficulty: intermediate
 time_saved: "~25 min/notice"
-version: 1.1
+version: 1.2
 last_eval_score: 9.20
 ---
 
@@ -44,9 +44,25 @@ Provide the following. Items 1–6 are required; 7–9 materially improve the ca
 6. **Preferred language(s)** — English, Spanish, Simplified Chinese, Vietnamese, Arabic, Russian, Haitian Creole, Tagalog, or other. For languages outside the skill's high-confidence range, produce English with translation-ready formatting and flag for a certified translator
 7. **Opt-out scope** — Whether the patient can opt out of (a) ambient capture of the visit, (b) AI drafting of patient-portal replies, (c) AI use in their prior-authorization review (often *not* under the patient's control — disclose this honestly), (d) downstream model training, (e) human-only review on request. Disclose what is and is not opt-outable in the practice's actual workflow — do not promise opt-outs the practice cannot deliver
 8. **Practice contact path** — Privacy Officer name and contact, AI Use Officer (if the practice has named one under the HHS AI Governance Board model), patient-relations line, and the state attorney-general or health-licensing complaint path the patient can use if their concern is not resolved internally
-9. **Tone & branding** — The practice's voice (formal, warm, plain, clinical) and any required branding (logo, NPI, address). Pull from `config.yml` → `voice` and `practice_info` if present
+9. **Tone & branding** — The practice's voice (formal, warm, plain, clinical) and any required branding (logo, NPI, address). Pull from `config.yml` → `branding_and_voice` if present (see Configuration section below)
 
 If state-required content is unknown, the skill returns an **"Information still needed"** list before drafting — and never invents a jurisdictional requirement.
+
+## Configuration (personalization from `config.yml`) — v1.2
+
+The Purpose section already assumes "which AI systems" the practice uses is a settled, standing fact — but until this version the skill re-derived that list from whatever the user typed into Required Input item 1 each time it drafted a notice. That is a real gap for exactly the workflow the "When to Use" section names as a scenario: a practice that has "added a new tool, retired a tool, switched vendors" and needs "a patient-facing summary of an internal AI-system change." Without a single source of truth, the check-in iPad screen, the portal long-form notice, and the NPP addendum can each be drafted from a different, stale description of the practice's actual AI stack — and under TRAIGA / AB 489 / HB26-1139, disclosing a retired tool or omitting a live one is not a stylistic miss.
+
+Load `config.yml` from the repo root and honor the following keys when present. Absent or partial keys fall back to the documented default and surface a `[VERIFY: ...]` flag rather than inventing a tool, a jurisdiction, or a contact.
+
+1. **`practice_ai_inventory`** — the practice's standing list of every patient-facing or administrative AI tool in use, keyed by function (ambient scribe, portal-reply drafter, prior-auth assistant, patient-facing chatbot, imaging/CDS overread tool), the vendor name, and the touchpoint(s) where a patient can encounter it. Drives **Section B (Where you will encounter AI in your care)** directly, so every notice — across every touchpoint and every state variant — draws from the same list, and a tool add/retirement/vendor-switch only has to be updated once. When absent, Section B is built from whatever the user supplies in Required Input item 1 for this request only, and the notice is flagged `[VERIFY: confirm this list matches the practice's current full AI inventory, not just the tool(s) named for this request]`.
+2. **`jurisdiction_registry`** — the states the practice operates in or serves patients from, keyed to the statute(s) in force for each (Texas TRAIGA, California AB 489, Colorado HB26-1139, Utah AI PA, Rhode Island H 7538, or other). Drives which statute stack **Section 1 (Confirm Required Disclosures)** applies without re-asking the jurisdiction on every request.
+3. **`opt_out_capabilities`** — the opt-outs the practice's actual workflow can support, per tool and per touchpoint (e.g., ambient-capture opt-out: yes, per-visit; portal-reply AI opt-out: yes, human drafts instead; payer prior-auth AI opt-out: no, payer-controlled). Drives **Section D (What you can choose)** so the notice never promises an opt-out the practice cannot honor and never omits one it can.
+4. **`governance_contacts`** — Privacy Officer, AI Use Officer, and patient-relations names and contact channels. Drives **Section F (Who to contact)** with named contacts rather than "the office."
+5. **`reading_level_and_language_defaults`** — cross-references the same keys `patient-education-handout.md` uses (`reading_level_default`, `language_preferences_supported`) so the two skills do not maintain independent, driftable reading-level and translation-coverage answers for the same patient population.
+6. **`branding_and_voice`** — practice name, logo reference, NPI, address, and voice (formal / warm / plain / clinical). Replaces the prior bare `practice_info` / `voice` mentions with a named, single hook.
+7. **`config_missing_behavior`** — `flag_and_proceed` (default) or `block_and_ask`.
+
+The notice is still fully draftable with no `config.yml` at all — every section renders from the current request's Required Input, and the missing standing facts surface as `[VERIFY]` flags (most importantly, a flag that the AI-tool list reflects only this request and may not be the practice's full current inventory) rather than as an assumed-complete disclosure.
 
 ## Instructions
 
@@ -236,4 +252,5 @@ A bad notice over-promises (zero data retention, "fully HIPAA-secure," "never ma
 
 ## Version History
 
+- **v1.2 (2026-07-28, skill evaluator):** Added the **Configuration (personalization from `config.yml`)** section: `practice_ai_inventory` (single source of truth for Section B across every touchpoint and state variant — closes the drift risk where a tool add/retirement/vendor-switch could leave one touchpoint's notice stale while another updates), `jurisdiction_registry`, `opt_out_capabilities`, `governance_contacts`, `reading_level_and_language_defaults` (shared keys with `patient-education-handout.md`), `branding_and_voice`, and `config_missing_behavior`. Strictly additive — no jurisdictional content, anti-pattern guardrail, or worked example was removed or weakened; the notice still drafts in full from Required Input alone with no `config.yml` present.
 - **v1.1 (2026-06-29):** Added Rhode Island H 7538 (Use of AI by Healthcare Providers Notification Act, signed June 22, 2026) to the jurisdictional perimeter — Purpose, When-to-Use, and the Section 1 "Confirm Required Disclosures" block. H 7538 makes per-encounter patient notification of AI documentation use a statutory obligation (paired with a clinician post-visit accuracy-review duty handled by `ambient-scribe-note-audit.md` v1.5). Noted the companion Rhode Island therapy-bot ban and chatbot-safety Act for practices running patient-facing behavioral-health chatbots. Strictly additive; no existing jurisdictional content, anti-pattern guardrail, or worked example was removed or weakened.
