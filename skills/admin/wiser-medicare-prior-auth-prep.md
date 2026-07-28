@@ -4,8 +4,8 @@ category: admin
 tools: [claude, chatgpt]
 difficulty: advanced
 time_saved: "~30 min/submission"
-version: 1.0
-last_eval_score: 9.10
+version: 1.1
+last_eval_score: 9.20
 ---
 
 # 🧾 WISeR Medicare Prior Auth Prep
@@ -43,6 +43,30 @@ Provide the following before running the skill:
 7. **Provider history (optional)** — Prior WISeR approval rate for this service, any open CAP or gold-carding progress notes.
 
 If required context is missing, return an **"Information still needed"** list rather than fabricating clinical detail. WISeR reviewers cite missing documentation as the top reason for non-affirmation.
+
+## Configuration (personalization from `config.yml`) — v1.1
+
+Items 1, 5, and 7 of the Required Input above are **standing facts about the practice**, not facts about the patient — the rendering provider's NPI/PTAN/TIN does not change between submissions, the MAC jurisdiction does not change between submissions, and the governing LCD for a given service line changes only when the MAC revises it. Re-keying them per packet is the single largest source of both wasted time and transcription error (a wrong PTAN is an administrative non-affirmation before a reviewer ever reads the clinical case).
+
+Load `config.yml` from the repo root and honor the following keys when present. When a key is absent or partial, fall back to the documented default and emit a `[VERIFY: ...]` flag rather than inventing an identifier, a jurisdiction, or a policy number. This is the same hook pattern used by `prior-auth-letter-generator` and `payer-downcoding-rebuttal-letter` v1.1.
+
+1. **`provider_identifiers`** — keyed roster per rendering/ordering provider: display name, credentials, specialty, **NPI, PTAN, TIN**, and the contact line for clarifying questions. Auto-fills **Section 1 (Submission Header)** and the **Section 8 attestation** signature block. When the provider is not in the roster, print the name as given and flag `[VERIFY: provider not in roster — confirm NPI/PTAN before submission]`. Never invent an NPI, PTAN, or TIN.
+
+2. **`mac_jurisdiction_map`** — the practice's WISeR-state → MAC mapping and the MAC's submission channel (portal URL, fax, contact), e.g. `AZ: { mac: "Noridian JF", portal: "[url]" }`, `WA: { mac: "Noridian JF" }`, `NJ: { mac: "Novitas JL" }`, `TX: { mac: "Novitas JH" }`, `OH: { mac: "CGS J15" }`, `OK: { mac: "Novitas JH" }`. Auto-fills the Section 1 MAC line and the submission-routing note. When absent, the skill states the MAC as `[VERIFY: MAC jurisdiction for state of service]` and does not guess. Note that MAC jurisdiction assignments are a CMS contracting fact that can change — a configured map is authoritative for the practice only until the MAC changes, so pair this key with `policy_refresh_date` below.
+
+3. **`wiser_policy_map`** — the practice's LCD/NCD/LCA citation library, keyed by **WISeR service category × MAC**, each entry carrying the policy number, title, effective date, the criterion list the policy imposes (duration thresholds, imaging look-back windows, conservative-therapy minimums, per-region injection caps), and the local coverage article for billing/coding detail. This is the key that makes **Section 4 (Policy Alignment Crosswalk)** render pre-populated with the *practice's actual governing criteria* instead of asking the submitter to look them up per packet. When absent, the crosswalk still renders, but every criterion row is emitted as `[VERIFY: retrieve governing LCD/NCD criterion]` and the skill lists which policy documents to pull.
+
+4. **`policy_refresh_date`** — the date the `wiser_policy_map` was last verified against the MAC's published policy set. If the map is older than 90 days at run time, the skill prepends a single line to the output: `[VERIFY: policy map last refreshed {date} — confirm LCD effective date and revision history before submission]`. A stale configured citation is more dangerous than a missing one, because it looks authoritative. This flag is not suppressible.
+
+5. **`service_line_attachment_packs`** — standing attachment checklists per WISeR service category, so **Section 7** ships pre-enumerated rather than reconstructed. Defaults if absent: **spinal fusion** → H&P, imaging report + PDF, ≥6–12 weeks conservative-care documentation, PT attendance log, medication trial log, surgical plan, attestation. **Epidural steroid / facet injection** → H&P, imaging with radicular correlation, prior-injection history with dates and levels (to evidence the per-region 12-month cap), conservative-care log, attestation. **Skin substitute** → wound etiology documentation, serial wound measurements, off-loading/compression compliance record, standard-wound-care failure across the policy-required duration, vascular assessment, product/units justification, attestation. **Arthroscopy for OA** → imaging, mechanical-symptom documentation, conservative-care log, attestation.
+
+6. **`wiser_determination_log`** — the practice's running record of prior WISeR determinations for this service line: affirmation rate, the reviewer reasons cited on any non-affirmation, and gold-carding progress. Drives two things: the Section 2 framing when the practice has a strong track record on this service, and — more usefully — a **pre-submission check against the practice's own prior non-affirmation reasons**, so the packet does not repeat a defect this practice has already been dinged for. When absent, the skill skips the check and notes that no determination history was supplied.
+
+7. **`expedited_criteria`** — the practice's documented criteria for requesting the 48-hour expedited determination rather than the 72-hour routine one. Drives the Section 1 expedited justification. When absent, the skill applies the statutory standard (life, health, or ability to regain maximum function) and refuses to draft an expedited justification that the supplied record does not support — see Anti-Error Guardrails.
+
+8. **`config_missing_behavior`** — `flag_and_proceed` (default) or `block_and_ask`. `flag_and_proceed` ships the packet with `[VERIFY: ...]` flags on missing keys; `block_and_ask` returns the missing-key list first. High-volume ASC and pain-management workflows typically prefer `flag_and_proceed`; new-practice onboarding typically prefers `block_and_ask`.
+
+When `config.yml` is absent entirely, the skill still produces the full eight-section packet with every practice-specific field replaced by a `[VERIFY: ...]` placeholder. It never invents an NPI, PTAN, TIN, MAC assignment, LCD number, or policy criterion.
 
 ## Instructions
 
@@ -216,3 +240,8 @@ WISeR PRIOR AUTHORIZATION REQUEST — Draft v1
 - WISeR does **not** change underlying Medicare coverage rules — it changes how compliance with those rules is reviewed. The skill's output must therefore always tie to existing NCD/LCD/Medicare Benefit Policy Manual language, not to invented criteria.
 - Gold-carding is scheduled to pilot mid-2026. Practices working toward it should keep a structured log of every WISeR determination; this skill's output is designed to be archived alongside each submission.
 - Nothing in this skill constitutes legal or billing advice. Final review by a credentialed coder and the rendering provider is required before submission.
+
+## Version History
+
+- **v1.1 (2026-07-13, skill evaluator)** — Added the **Configuration** section: `provider_identifiers` (NPI/PTAN/TIN roster), `mac_jurisdiction_map`, `wiser_policy_map` (LCD/NCD citation library keyed by service category × MAC, which pre-populates the Section 4 crosswalk), `policy_refresh_date` (non-suppressible staleness flag at 90 days), `service_line_attachment_packs`, `wiser_determination_log` (pre-submission check against the practice's own prior non-affirmation reasons), `expedited_criteria`, and `config_missing_behavior`. Closes the standing-fact re-entry gap in Required Input items 1, 5, and 7. Strictly additive — no guardrail, `[VERIFY]` convention, `[SAFETY]` flag, template section, or worked example was removed or weakened; every hook degrades to a `[VERIFY]` flag when config is absent.
+- **v1.0** — Initial release: eight-section WISeR packet, policy-alignment crosswalk, safety/compliance flags, anti-error guardrails, worked example.

@@ -4,8 +4,8 @@ category: admin
 tools: [claude, chatgpt]
 difficulty: advanced
 time_saved: "~35 min/letter"
-version: 1.0
-last_eval_score: 9.10
+version: 1.1
+last_eval_score: 9.20
 ---
 
 # 📉 Payer Downcoding Rebuttal Letter
@@ -50,11 +50,19 @@ If the note is ambient-scribe-authored and no pre-bill audit was performed, the 
 
 You are a revenue-cycle, coding, and payer-relations AI assistant. Draft a calm, evidence-first rebuttal letter that a CDI, coding, or revenue-integrity team can review and send. The tone is professional and non-adversarial; the argument is specific to the CPT elements the payer reduced.
 
-**Before you start:**
+**Before you start (personalization from `config.yml`):**
 - Load `config.yml` from the repo root for facility details, provider credentials, appeal address routing, and tone preferences
 - Reference `knowledge-base/terminology/` for correct E/M, MDM, CDI, and billing terminology
 - Reference `knowledge-base/regulations/` for current CPT E/M rules (2021 office/outpatient, 2023 other E/M, 2024 split/shared finalized rule), CMS prolonged services, two-midnight rule, DRG and CC/MCC logic, modifier 25 guidance
 - Use the facility's communication tone from `config.yml` → `voice`
+
+The rebuttal's *strength* is payer- and provider-specific, and the two most decision-critical facts — where and by when the reconsideration must land, and whether the payer's "outlier billing" rationale can be rebutted with the provider's own distribution — are stable attributes that belong in config rather than being re-entered per letter (Required Input items 6–8). Use the named hooks below; when a hook is absent, fall back to the generic CPT/CMS argument and surface a `[VERIFY: ...]` flag rather than inventing a routing address, a deadline, or a benchmark.
+
+- **`config.yml` → `payer_downcoding_profiles`** — keyed per payer / plan (`anthem_commercial`, `uhc_ma`, `state_medicaid_mco`, `medicare_ffs`, etc.), each carrying: `reconsideration_routing` (appeal address / fax / portal URL and the specific queue for post-adjudication code-level reconsideration vs. a medical-necessity appeal); `appeal_deadline` (the internal-reconsideration filing window for that payer / regulatory class — commercial 30–180 days, Medicare Advantage per 42 CFR 422.562, ERISA self-funded per 29 CFR 2560.503-1, state prompt-pay overlay); `downcoding_program` (whether the payer publishes an E/M downcoding threshold / policy the letter should cite and rebut on its own terms, or applies a silent statistical adjustment the letter should name as not-a-documentation-review); and `prior_rebuttal_outcome` (this provider's history with this payer on the same code family, to calibrate tone and escalation). The applicable deadline is surfaced at the **top** of the output; the closing next-step language matches the payer's regulatory class. If the payer is unmapped, flag `[VERIFY: payer reconsideration routing and filing deadline]` and use the generic post-adjudication-reconsideration template.
+- **`config.yml` → `provider_em_benchmarks`** — the provider's or specialty's E/M level distribution against the CMS / specialty-society benchmark, keyed by provider NPI or specialty. When the payer cites "outlier billing" or statistical variance, the letter rebuts with the provider's actual distribution in context (e.g., case-mix, acuity, subspecialty referral pattern) rather than only the general CPT principle that code selection is encounter-driven. If absent, the letter still makes the encounter-driven argument and flags `[VERIFY: provider E/M distribution vs. benchmark if payer cited outlier billing]`.
+- **`config.yml` → `revenue_integrity_contact`** and **`provider_directory`** — the CDI / revenue-integrity process contact and the rendering provider's credentials / NPI / direct line for the signature and contact block, so the letter's two-contact close (clinical questions vs. process questions) is populated rather than left as placeholders.
+
+When `config.yml` is absent entirely, the skill produces the complete rebuttal in the correct downcoding-path template, surfaces the applicable deadline as a `[VERIFY: filing deadline for this payer / regulatory class]` flag at the top, makes the encounter-driven CPT argument without a benchmark, and marks every facility- and payer-specific element (routing, deadline, benchmark, contacts, attestation) as a `[VERIFY: ...]` flag. It never invents a payer appeal address, fax, portal URL, filing deadline, or provider benchmark.
 
 **Process:**
 
@@ -243,3 +251,8 @@ Dr. R. Patel, MD                       Revenue Integrity / CDI
 - Anti-plagiarism: output is original paraphrasing, the CPT and CMS citations are to published rule-making, and payer-specific language is never copied from proprietary policies. Never reproduce payer reimbursement-policy text verbatim.
 - Scope: commercial plans, Medicare Advantage, Medicaid managed care, and Medicare FFS post-pay review. State-specific prompt-pay or external-review nuances must be layered in by the user — the skill flags `[VERIFY: state rule]` when relevant.
 - Tone: deliberately non-adversarial. 2026 payer AI adjudicators pattern-match aggressive language; an evidence-driven calm letter tends to route to a human reviewer faster.
+
+## Version History
+
+- **v1.1** — Added personalization hooks (`config.yml → payer_downcoding_profiles` keyed per payer/plan for reconsideration routing, filing deadline by regulatory class, published-vs-silent downcoding program, and prior-rebuttal outcome; `provider_em_benchmarks` to rebut "outlier billing" with the provider's actual distribution; `revenue_integrity_contact` / `provider_directory` for the two-contact close). The applicable deadline now surfaces at the top of the output and the closing next-step language matches the payer's regulatory class. Strictly additive — every downcoding-path template (MDM / time / DRG CC-MCC / observation-vs-inpatient / modifier-25 / prolonged-services), the four fairness guardrails, the no-fabrication and ≤20-word-verbatim rules, and the worked example are unchanged; hooks degrade to `[VERIFY]` flags when config is absent.
+- **v1.0** — Initial code-level downcoding rebuttal skill for the 2026 payer-AI-adjudication environment.

@@ -4,8 +4,8 @@ category: operations
 tools: [claude, chatgpt]
 difficulty: intermediate
 time_saved: "~10 min/encounter"
-version: 1.1
-last_eval_score: 9.10
+version: 1.2
+last_eval_score: 9.20
 ---
 
 # 🏠 SDOH Risk Assessment Summarizer
@@ -43,6 +43,17 @@ Provide the following:
 If the screening result is missing, return a request for the completed instrument rather than fabricating responses. If a patient declined to answer specific items, preserve that as "declined" — never impute a positive or negative.
 
 ## Instructions
+
+**Before you start (personalization from `config.yml`):**
+
+Load `config.yml` from the repo root. An SDOH summary is only actionable if the referral it recommends points at a resource the practice can actually reach *today*; a generic "refer to a food pantry" line forces the care manager to re-do the work. Use the named hooks below so referrals name the practice's real partners and the coding hand-off names the practice's actual contracts. When a hook is absent, the skill still recommends a generic referral *category* and flags the specific-resource gap rather than inventing an organization.
+
+- **`config.yml` → `community_resource_directory`** — keyed per SDOH domain (`food`, `housing`, `utilities`, `transportation`, `ipv_safety`, `financial`, `legal`, `behavioral_health`, `social_isolation`, `caregiver`), each listing the practice's actual referral partners with the closed-loop method (`warm_handoff` / `e-referral platform (e.g., Unite Us / findhelp)` / `phone` / `secure message`) and the named contact or intake line. The Domain-by-Domain and Closed-Loop Referral blocks pull the matching partner instead of emitting a `[practice partner]` placeholder. If a domain has no mapped resource, the skill recommends the generic category and flags `[VERIFY: no mapped community resource for this domain — add to config or supply inline]`.
+- **`config.yml` → `value_based_measure_set`** — the practice's actual SDOH-linked contracts and measures (e.g., `NCQA_SDOH-E`, `state_medicaid_MCO: "[measure spec]"`, `MA_star_SNS-E`, `ACO_REACH`, `FQHC_UDS`). Section 4 (Coding & Billing Hand-Off) names which of the practice's real measures this encounter helps close rather than listing generic possibilities. If absent, flag `[VERIFY: confirm which value-based measure this encounter counts toward]`.
+- **`config.yml` → `z_code_set_year`** and **`sdoh_billing_defaults`** — the current-year ICD-10-CM Z-code set the coder validates against and practice defaults for G0136 administration (typical administering role, standard instrument bundle, time-element documentation habit). Keeps the Z-code suggestions and G0136 eligibility check aligned to the practice's coding calendar; the `[VERIFY — coder confirms current-year code set]` flag remains regardless.
+- **`config.yml` → `reading_level_default`** and **`language_preference_routing`** — patient-facing reading-level default (6th–8th grade unless overridden) and the practice's certified-translation-review path, so the Section 5 patient-facing summary routes any non-English draft through the documented translation workflow rather than shipping machine translation in the AVS.
+
+When `config.yml` is absent entirely, the skill produces the full six-section summary, recommends generic referral *categories* for every positive domain, uses the default 6th–8th-grade reading level, routes any non-English draft through a `[VERIFY: certified-translation review]` flag, and surfaces every practice-specific element (named partner, measure set, translation path) as a `[VERIFY: ...]` flag. It never invents a specific community organization, contract, or contact.
 
 Follow this six-section structure. Do not reproduce patient quotes verbatim beyond short, de-identifiable snippets.
 
@@ -248,3 +259,8 @@ Re-screen in 6 months (G0136 frequency limit).
 - NLP-based extraction of SDOH from unstructured notes is common in 2026 toolchains, but this skill never reclassifies a "not screened" domain as positive based on notes alone — any such signal is surfaced as "consider re-screening."
 - The AHC-HRSN, PRAPARE, and similar screeners are public-domain; the skill works with their result fields without reproducing the instrument verbatim.
 - Nothing in this skill replaces clinician judgment, mandated reporting workflows, or the practice's compliance program.
+
+## Version History
+
+- **v1.2** — Added personalization hooks (`config.yml → community_resource_directory` keyed by SDOH domain, `value_based_measure_set`, `z_code_set_year` / `sdoh_billing_defaults`, `reading_level_default` / `language_preference_routing`) so referrals name the practice's real closed-loop partners instead of `[practice partner]` placeholders and the coding hand-off names the practice's actual contracts. Strictly additive — the six-section structure, all safety/privacy flags (`[SAFETY — IMMEDIATE]`, `[SENSITIVE CHANNEL]`, `[NO IMPUTATION]`), the no-imputation and no-fabricated-Z-code guardrails, and the worked example are unchanged; hooks degrade to `[VERIFY]` flags when config is absent.
+- **v1.1** — Prior baseline (G0136 SDOH risk-assessment summarizer with Z-code and closed-loop-referral scaffolding).

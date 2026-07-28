@@ -4,8 +4,8 @@ category: admin
 tools: [claude, chatgpt]
 difficulty: intermediate
 time_saved: "~25 min/letter"
-version: 2.4
-last_eval_score: 9.10
+version: 2.5
+last_eval_score: 9.20
 ---
 
 # 📋 Prior Auth Letter Generator
@@ -28,6 +28,8 @@ Use this skill when a payer requires prior authorization before a service can be
 - Step-therapy exception requests when standard formulary path is clinically inappropriate
 
 ## Required Input
+
+**You do not need to hand-key all eight items.** The skill drafts from a **minimum viable input** of three things — the payer, the requested service in plain language, and a raw paste of the clinical note — and extracts, config-fills, or defaults the rest. See **Single-Pass Intake & Gap Triage** under Instructions. The list below is what a *complete* submission contains, not a form you must fill before the skill will run.
 
 Provide the following:
 
@@ -79,10 +81,44 @@ Additionally:
 
 When `config.yml` is absent entirely, the skill ships a fully-formed letter with the seven sections present, every payer-specific or practice-specific field replaced with a `[VERIFY: ...]` placeholder, the default authority-chain applied for the service line, and the standard-review timeline cited. It never invents a payer fax, portal URL, NPI, or signature block.
 
+### Single-Pass Intake & Gap Triage (v2.5 addition)
+
+Prior auth is a volume workflow. A UM coordinator running fifteen letters before lunch does not have a conversation with the skill — a skill that trickles clarifying questions across three turns costs more time than it saves, and the eight-item Required Input list above reads, to a first-time user, like eight things they must hand-key before anything happens. They must not. **The default path is one paste in, one draft out.**
+
+**Minimum viable input (MVI).** The skill drafts a complete letter from three things:
+
+1. the **payer** (name, or the plan type if the name is unknown),
+2. the **requested service** (procedure, drug, or item — a code is welcome but a plain-language description is sufficient; the skill proposes the CPT/HCPCS and ICD-10 and flags them `[VERIFY: code proposed by skill — confirm before submission]`), and
+3. a **clinical paste** — the chart note, the H&P, the referral, the office note, or the visit summary, pasted raw. Unstructured is fine. Multiple notes are fine.
+
+Everything else in the Required Input list is either **extracted from the paste** (Instructions items 1, 3, 4, 5), **filled from `config.yml`** (items 5, 6 via `provider_identifiers` / `signature_block_pa` / `payer_pa_routing` / `payer_pa_forms`), **derived** (item 7 urgency, via `expedited_review_triggers`), or **defaulted** (item 8, via `authority_chain_by_service_line` and `enclosure_pack_defaults`). Do not ask the user to re-key anything the paste already contains.
+
+**Extraction pass.** Before drafting, silently extract from the clinical paste: diagnosis and ICD-10 candidates, symptom onset and duration, functional impact, exam and imaging findings with dates, conservative and step-therapy trials with dates and outcomes, contraindications and documented adverse reactions, allergies, and the ordering provider. Anything extracted is marked `[VERIFY: extracted from note — confirm]` on first use in the letter. Anything **not** found is a gap, not a question.
+
+**One-round gap triage.** Ask at most **one** consolidated round of questions, and only for gaps in the *blocking* tier. Return the gap list as a single ranked block, then — under the default `config_missing_behavior: flag_and_proceed` — **draft the letter anyway** with `[VERIFY]` flags in place, so the coordinator can answer the questions and correct the draft in the same pass rather than waiting on a blank screen:
+
+```
+GAPS BEFORE SUBMISSION
+
+🔴 BLOCKING — the payer will deny or return the request without this
+   1. [e.g., no documented conservative-therapy duration; payer policy requires ≥6 weeks]
+   2. [e.g., requested agent is non-formulary and no step-therapy failure is documented]
+
+🟠 WEAKENING — the letter will be materially less persuasive without this
+   3. [e.g., imaging referenced but no report attached; no date on the PT trial]
+
+🟡 COSMETIC — fill if convenient; letter is submittable without it
+   4. [e.g., group number; P2P callback window]
+```
+
+Never split these across turns. Never ask for a fact that `config.yml` supplies, that the paste contains, or that sits in the cosmetic tier. If a blocking gap is a genuine clinical absence rather than a missing document — the conservative-therapy trial did not happen — say so plainly: the fix is clinical, not editorial, and no wording will close it. **Do not pad the letter to obscure a blocking gap;** a persuasive letter over an absent criterion is how a practice ends up with an approval it cannot defend on audit.
+
+**Stop rule.** If the one round of questions goes unanswered, ship the letter with the flags standing. The coordinator's edit pass is the intended completion step. Under `config_missing_behavior: block_and_ask`, return the gap list and stop instead — this is the onboarding posture, not the volume posture.
+
 **Process:**
 
 1. Review all input provided and identify the payer, service type, and urgency level
-2. Ask clarifying questions only if the diagnosis or requested service is unclear. Make reasonable assumptions for formatting and include `[VERIFY: ...]` flags for details the provider should confirm
+2. Run the Single-Pass Intake & Gap Triage above: extract from the clinical paste, fill from config, and raise at most one consolidated, tiered gap block. Make reasonable assumptions for formatting and include `[VERIFY: ...]` flags for details the provider should confirm
 3. Structure the prior authorization letter with the following components:
 
    **a. Header & Identification**
@@ -441,3 +477,8 @@ The audit and workflow implications for PA letter-writers, both human-led and AI
 - **Multi-step orchestration is a distinct skill class.** This skill is designed for the *letter-drafting* slice of the PA workflow. Multi-step orchestration — eligibility, benefit verification, document collection, portal filing, status polling, denial-routing, appeal-routing, peer-to-peer scheduling — is a different workflow class and should be evaluated separately against the benchmark evidence rather than treated as a natural extension of letter-drafting performance.
 
 **Interaction with prior sections.** Neither addition changes the letter format, the worked examples, the `config.yml` hooks, or the `[VERIFY]` flag pattern. Both additions sharpen the *posture* the skill expects the practice to take around the letter: Medicaid adverse determinations now warrant a procedural-defect appeal argument when no human reviewer of appropriate expertise is identified, and AI-assisted PA workflows should remain explicitly bounded at the single-letter scope unless and until reliability evidence justifies a broader scope. The skill remains a reviewer's tool that produces a draft a human reviews, edits, and signs; it does not file, follow up, or appeal autonomously, and on the May 2026 evidence base that scope boundary is the correct one.
+
+## Version History
+
+- **v2.5 (2026-07-13, skill evaluator)** — Added **Single-Pass Intake & Gap Triage**: a three-item minimum viable input (payer + service in plain language + raw clinical paste), a silent extraction pass over the paste, a single consolidated and severity-tiered gap block (🔴 blocking / 🟠 weakening / 🟡 cosmetic) instead of serial clarifying questions, and a stop rule that ships the letter with `[VERIFY]` flags standing so the coordinator's edit pass completes it. Required Input reframed as "what a complete submission contains," not a form to fill before the skill runs. Closes the back-and-forth gap in a high-volume UM workflow. Strictly additive — no letter section, worked example, config hook, `[VERIFY]` convention, guardrail, or the v2.4 regulatory/agent-reliability posture was removed or weakened; the explicit prohibition on padding a letter over a blocking clinical gap was **added**, not relaxed.
+- **v2.4** — Regulatory & agent-reliability awareness (Medicaid human-review requirement for adverse determinations; CHI-Bench agent-reliability evidence bounding the skill at single-letter scope).

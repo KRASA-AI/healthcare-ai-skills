@@ -4,8 +4,8 @@ category: operations
 tools: [claude, chatgpt]
 difficulty: intermediate
 time_saved: "~6 min/patient handoff"
-version: 1.0
-last_eval_score: 9.10
+version: 1.1
+last_eval_score: 9.20
 ---
 
 # 🩺 Nurse Shift Handoff (I-SBARR) Generator
@@ -47,7 +47,15 @@ If a patient is unstable, in the middle of a rapid response, or has an active sa
 
 ## Instructions
 
-For every patient, produce the six-element I-SBARR output in the exact order below. Keep each element to the minimum length needed to be actionable. Never use a patient's full name in the header — use room/bed and initials.
+**Before you start (personalization from `config.yml`):**
+
+Load `config.yml` from the repo root. A shift handoff is unit-specific: the same six-element structure has to render into *the incoming nurse's expected mental model* — the unit's board columns, local acronyms, standard drip protocols, escalation chain, and population defaults. Use the named hook below so the drafter matches the unit instead of asking the outgoing RN to re-enter unit conventions every shift. When the hook is absent, fall back to the documented generic structure and surface a `[VERIFY: ...]` flag rather than inventing a unit-specific value.
+
+- **`config.yml` → `unit_profiles`** — keyed per unit (e.g., `4S_telemetry`, `MICU`, `L&D`, `behavioral_health_3E`), each carrying: `population_type` (adult med-surg / tele / ICU / step-down / ED / L&D / postpartum / peds / behavioral health), which drives the population-specific safety note; `board_columns` / `local_acronyms` (the column order and shorthand the incoming RN expects on the board so the Assessment and rollup render in the unit's own layout); `default_code_status_display` and whether allergies/isolation/fall-risk are shown inline by default; `standard_titratable_drips` with the unit's protocol name and titration target (e.g., `esmolol: "CT-surgery rate-control protocol, target HR < 100"`, `norepinephrine: "MAP > 65"`) so the Recommendation section names the unit's protocol rather than a generic range; `escalation_chain` (charge RN, rapid-response/MET criteria and pager, house supervisor, on-call intensivist) so `[ACTION — NOTIFY PROVIDER]` items route to the unit's actual contacts; `standard_ratio` (used in the Unit-Level Rollup acuity read); and `handoff_format_default` (bedside / board / phone). The drafter selects the block matching the sender's unit from item 7 of Required Input; if the unit is unmapped, it uses the generic structure and flags `[VERIFY: unit profile — board columns, drip protocols, and escalation chain not in config]`.
+
+When `config.yml` is absent entirely, the drafter produces the complete generic I-SBARR in the standard structure below, applies conservative population-agnostic safety defaults, and surfaces every unit-specific element (board layout, local acronyms, named drip protocol, escalation contacts, ratio) as a `[VERIFY: ...]` flag. It never invents a unit protocol name, a pager number, a rapid-response threshold, or an escalation contact.
+
+For every patient, produce the six-element I-SBARR output in the exact order below. Keep each element to the minimum length needed to be actionable. Never use a patient's full name in the header — use room/bed and initials. When a `unit_profiles` block is present, render the Assessment body and the Unit-Level Rollup in the unit's own board-column order and local acronyms, name the unit's drip protocols in the Recommendation section, and route `[ACTION — NOTIFY PROVIDER]` items to the unit's escalation chain.
 
 ### I — Introduction
 
@@ -205,3 +213,8 @@ Incoming RN: _______ — _______
 - Pediatric, obstetric, and behavioral-health units should have local policies that supersede this skill's default structure; the skill includes population-specific safety notes but is not a substitute for unit-specific handoff tools (e.g., SBAR-P, I-PASS for pediatrics).
 - For ambulatory, procedural, or OR-to-PACU handoffs, use the team's local checklist-driven handoff tool (e.g., WHO Surgical Safety Checklist) rather than this skill.
 - Output is drafted content only. The outgoing RN is responsible for accuracy before verbal handoff and EHR charting.
+
+**Version history**
+
+- **v1.1** — Added the `config.yml → unit_profiles` personalization hook so the handoff renders in the incoming RN's expected board layout / local acronyms, names the unit's standard drip-titration protocols in the Recommendation section, and routes `[ACTION — NOTIFY PROVIDER]` items to the unit's actual escalation chain (charge / rapid-response / house supervisor). Strictly additive — the generic I-SBARR structure, all safety guardrails, and the worked example are unchanged; the hook degrades gracefully to `[VERIFY]` flags when config is absent.
+- **v1.0** — Initial I-SBARR generator aligned to Joint Commission NPSG.02.03.01.
